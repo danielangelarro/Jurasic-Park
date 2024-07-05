@@ -1,0 +1,14 @@
+{
+    "Explorador": {
+        "habilidades": {"exploracion": 80, "caza": 50, "recoleccion": 60, "pesca": 40},
+        "genetica": {"fuerza": 60, "velocidad": 70, "resistencia": 80, "inteligencia": 70, "adaptabilidad": 90}
+    },
+    "Cazador": {
+        "habilidades": {"exploracion": 50, "caza": 90, "recoleccion": 40, "pesca": 50},
+        "genetica": {"fuerza": 90, "velocidad": 80, "resistencia": 70, "inteligencia": 60, "adaptabilidad": 50}
+    },
+    "Recolector": {
+        "habilidades": {"exploracion": 60, "caza": 40, "recoleccion": 90, "pesca": 50},
+        "genetica": {"fuerza": 50, "velocidad": 60, "resistencia": 70, "inteligencia": 90, "adaptabilidad": 70}
+    }
+}

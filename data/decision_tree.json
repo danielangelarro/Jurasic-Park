@@ -1,0 +1,250 @@
+{
+  "sabana": {
+    "acciones": [
+      {
+        "condition": "not is_alive",
+        "true": "return"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Caza > 50",
+        "true": "cazar"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Recoleccion > 40",
+        "true": "recolectar"
+      },
+      {
+        "condition": "cansancio > 70",
+        "true": "descansar"
+      },
+      {
+        "condition": "genetica.Inteligencia > 60 and habilidades.Exploracion > 50",
+        "true": "construir"
+      },
+      {
+        "condition": "genetica.Adaptabilidad < 30",
+        "true": "buscar_refugio"
+      },
+      {
+        "condition": "genetica.Velocidad > 70",
+        "true": "huir"
+      },
+      {
+        "condition": "genetica.Inteligencia > 50",
+        "true": "comunicar"
+      },
+      {
+        "condition": "genetica.Resistencia > 50",
+        "true": "aparearse"
+      },
+      {
+        "condition": "genetica.Fuerza > 60",
+        "true": "atacar"
+      },
+      {
+        "condition": "True",
+        "true": "acercarse"
+      }
+    ]
+  },
+  "desierto": {
+    "acciones": [
+      {
+        "condition": "not is_alive",
+        "true": "return"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Caza > 50",
+        "true": "cazar"
+      },
+      {
+        "condition": "cansancio > 70",
+        "true": "descansar"
+      },
+      {
+        "condition": "genetica.Adaptabilidad < 30",
+        "true": "buscar_refugio"
+      },
+      {
+        "condition": "genetica.Velocidad > 70",
+        "true": "huir"
+      },
+      {
+        "condition": "genetica.Inteligencia > 50",
+        "true": "comunicar"
+      },
+      {
+        "condition": "genetica.Resistencia > 50",
+        "true": "aparearse"
+      },
+      {
+        "condition": "True",
+        "true": "acercarse"
+      }
+    ]
+  },
+  "pradera": {
+    "acciones": [
+      {
+        "condition": "not is_alive",
+        "true": "return"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Caza > 50",
+        "true": "cazar"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Recoleccion > 40",
+        "true": "recolectar"
+      },
+      {
+        "condition": "cansancio > 70",
+        "true": "descansar"
+      },
+      {
+        "condition": "genetica.Inteligencia > 60 and habilidades.Exploracion > 50",
+        "true": "construir"
+      },
+      {
+        "condition": "genetica.Adaptabilidad < 30",
+        "true": "buscar_refugio"
+      },
+      {
+        "condition": "genetica.Velocidad > 70",
+        "true": "huir"
+      },
+      {
+        "condition": "genetica.Inteligencia > 50",
+        "true": "comunicar"
+      },
+      {
+        "condition": "genetica.Resistencia > 50",
+        "true": "aparearse"
+      },
+      {
+        "condition": "genetica.Fuerza > 60",
+        "true": "atacar"
+      },
+      {
+        "condition": "True",
+        "true": "acercarse"
+      }
+    ]
+  },
+  "agua": {
+    "acciones": [
+      {
+        "condition": "not is_alive",
+        "true": "return"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Pesca > 30",
+        "true": "pescar"
+      },
+      {
+        "condition": "is_sediento",
+        "true": "beber"
+      },
+      {
+        "condition": "genetica.Velocidad > 70",
+        "true": "huir"
+      },
+      {
+        "condition": "genetica.Inteligencia > 50",
+        "true": "comunicar"
+      },
+      {
+        "condition": "True",
+        "true": "acercarse"
+      }
+    ]
+  },
+  "acantilado": {
+    "acciones": [
+      {
+        "condition": "not is_alive",
+        "true": "return"
+      },
+      {
+        "condition": "cansancio > 70",
+        "true": "descansar"
+      },
+      {
+        "condition": "genetica.Adaptabilidad < 30",
+        "true": "buscar_refugio"
+      },
+      {
+        "condition": "genetica.Velocidad > 70",
+        "true": "huir"
+      },
+      {
+        "condition": "genetica.Inteligencia > 50",
+        "true": "comunicar"
+      },
+      {
+        "condition": "genetica.Resistencia > 50",
+        "true": "aparearse"
+      },
+      {
+        "condition": "genetica.Fuerza > 60",
+        "true": "atacar"
+      },
+      {
+        "condition": "True",
+        "true": "acercarse"
+      }
+    ]
+  },
+  "pantano": {
+    "acciones": [
+      {
+        "condition": "not is_alive",
+        "true": "return"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Caza > 50",
+        "true": "cazar"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Recoleccion > 40",
+        "true": "recolectar"
+      },
+      {
+        "condition": "is_hambriento and habilidades.Pesca > 30",
+        "true": "pescar"
+      },
+      {
+        "condition": "is_sediento",
+        "true": "beber"
+      },
+      {
+        "condition": "cansancio > 70",
+        "true": "descansar"
+      },
+      {
+        "condition": "genetica.Adaptabilidad < 30",
+        "true": "buscar_refugio"
+      },
+      {
+        "condition": "genetica.Velocidad > 70",
+        "true": "huir"
+      },
+      {
+        "condition": "genetica.Inteligencia > 50",
+        "true": "comunicar"
+      },
+      {
+        "condition": "genetica.Resistencia > 50",
+        "true": "aparearse"
+      },
+      {
+        "condition": "genetica.Fuerza > 60",
+        "true": "atacar"
+      },
+      {
+        "condition": "True",
+        "true": "acercarse"
+      }
+    ]
+  }
+}
