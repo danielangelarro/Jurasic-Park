@@ -786,3 +786,44 @@ Ten en cuenta la siguiente restriccion de las acciones que se pueden realizar en
 }
 ```
 
+## Lista de Hipótesis
+
+1. **Hipótesis de Supervivencia y Hábitat:**
+   - **Hipótesis 1:** Los humanos que habitan en zonas con más recursos naturales (agua y vegetación) tendrán una mayor tasa de supervivencia.
+   - **Hipótesis 2:** Los humanos en áreas peligrosas, como acantilados y pantanos, tendrán una mayor tasa de mortalidad debido a los ataques de depredadores y accidentes ambientales.
+
+2. **Hipótesis de Comportamiento Social:**
+   - **Hipótesis 3:** Los humanos que forman grupos de cooperación tienen una mayor tasa de supervivencia en comparación con los que actúan individualmente.
+   - **Hipótesis 4:** Los humanos que comunican y comparten información sobre recursos y peligros tendrán una mayor tasa de supervivencia.
+
+3. **Hipótesis de Evolución Genética:**
+   - **Hipótesis 5:** La aplicación del algoritmo genético después de cada ciclo de reproducción resulta en una adaptación más rápida a las condiciones del parque jurásico.
+   - **Hipótesis 6:** La aplicación del algoritmo genético al final de una simulación completa y la selección de los mejores sobrevivientes para la siguiente generación produce individuos más fuertes y adaptados en comparación con la selección en cada ciclo de reproducción.
+
+4. **Hipótesis de Reproducción y Cuidados:**
+   - **Hipótesis 7:** Las mujeres que tienen períodos de gestación más largos y cuidados postnatales mejorados tendrán crías con mayor tasa de supervivencia.
+   - **Hipótesis 8:** Los humanos que se aparean con individuos que tienen habilidades mejoradas (por ejemplo, caza, recolección) producirán crías con mayor tasa de supervivencia y habilidades heredadas mejoradas.
+
+5. **Hipótesis de Interacción con Dinosaurios:**
+   - **Hipótesis 9:** Los humanos que desarrollan habilidades de huida y refugio tendrán una mayor tasa de supervivencia frente a ataques de dinosaurios.
+   - **Hipótesis 10:** Los humanos que se enfrentan a dinosaurios con habilidades mejoradas de ataque y defensa tendrán una mayor probabilidad de supervivencia.
+
+### Variables a Medir
+
+Para probar estas hipótesis, es necesario definir y medir varias variables en la simulación, incluyendo:
+
+- Tasa de supervivencia (número de humanos sobrevivientes / total de humanos)
+- Número de recursos naturales consumidos (agua, alimentos)
+- Tasa de mortalidad en diferentes hábitats
+- Tamaño de los grupos de cooperación
+- Frecuencia y eficacia de la comunicación
+- Habilidades heredadas (caza, recolección, pesca, defensa, etc.)
+- Número de crías y su tasa de supervivencia
+- Frecuencia y resultado de interacciones con dinosaurios (ataques, huidas)
+- Adaptaciones genéticas observadas después de cada generación
+
+### Implementación de Experimentos
+
+Para cada hipótesis, se pueden diseñar experimentos específicos dentro de la simulación. Por ejemplo, para la **Hipótesis 1**, se podría crear diferentes escenarios con humanos en distintas zonas del parque y medir la tasa de supervivencia en cada zona. Para la **Hipótesis 5** y **Hipótesis 6**, se puede comparar los resultados de la simulación aplicando el algoritmo genético en diferentes momentos y medir la adaptabilidad y habilidades de las nuevas generaciones.
+
+Estos experimentos ayudarán a validar las hipótesis y proporcionarán información valiosa sobre la dinámica de la comunidad humana en el parque jurásico.

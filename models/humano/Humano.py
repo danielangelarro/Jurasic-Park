@@ -32,7 +32,7 @@ class Humano(Animal):
             peso=4,
             sexo=sexo,
             alcance_vision=5,
-            alcance_accion=3,
+            alcance_accion=1,
             ataque=0.5,
             defensa=0.5,
             habitat=[Tipo_Terreno.ALL],
@@ -42,7 +42,7 @@ class Humano(Animal):
         )
 
         self.nombre = nombre
-        self.edad = edad
+        self.edad = edad * 360
         self.personalidad = personalidad
         self.sed = 0
         self.cansancio = 0
@@ -107,7 +107,8 @@ class Humano(Animal):
             if obj["tipo"] in (Tipo_Terreno.SABANA, Tipo_Terreno.PRADERA)
         ]
 
-        if not terrenos_caza or self.peso >= self.max_peso:
+        if not terrenos_caza or self.peso >= self.max_peso or not self.is_hambriento:
+            self.acercarse_terreno(ecosistema, reportes, [Tipo_Terreno.SABANA, Tipo_Terreno.PRADERA])
             return False
 
         exito = (self.genetica.Fuerza + self.genetica.Velocidad + self.genetica.Adaptabilidad) / 3
@@ -135,7 +136,8 @@ class Humano(Animal):
             if obj["tipo"] in (Tipo_Terreno.SABANA, Tipo_Terreno.PRADERA)
         ]
 
-        if not terrenos_recoleccion or self.peso >= self.max_peso:
+        if not terrenos_recoleccion or self.peso >= self.max_peso or not self.is_hambriento:
+            self.acercarse_terreno(ecosistema, reportes, [Tipo_Terreno.SABANA, Tipo_Terreno.PRADERA])
             return False
 
         exito = (self.genetica.Inteligencia + self.genetica.Velocidad + self.genetica.Adaptabilidad) / 3
@@ -163,7 +165,8 @@ class Humano(Animal):
             if obj["tipo"] == Tipo_Terreno.AGUA
         ]
 
-        if not terrenos_recoleccion or self.peso >= self.max_peso:
+        if not terrenos_recoleccion or self.peso >= self.max_peso or not self.is_hambriento:
+            self.acercarse_terreno(ecosistema, reportes, [Tipo_Terreno.AGUA])
             return False
 
         exito = (self.habilidades.Pesca + self.genetica.Inteligencia + self.genetica.Fuerza) / 3
@@ -220,7 +223,7 @@ class Humano(Animal):
                and obj.sexo != self.sexo
                and obj.edad >= self.edad_adulta
                and not (obj.sexo == "Hembra" and obj.is_pregnant)
-               and ecosistema.posiciones_vecinas_libres(obj.posicion)
+               # and ecosistema.posiciones_vecinas_libres(obj.posicion)
         ]
 
         if posibles_parejas:
@@ -263,7 +266,7 @@ class Humano(Animal):
                     sexo=random.choice(["Macho", "Hembra"])
                 )
                 self.crias.append(nuevo_bebe)
-                ecosistema.humanos.append(nuevo_bebe)
+                ecosistema.animales.append(nuevo_bebe)
                 reportes.append({
                     "entidad": self,
                     "tipo": "crecer",

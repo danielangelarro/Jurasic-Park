@@ -44,13 +44,14 @@ for _ in range(5):
 for _ in range(5):
     ecosistema.agregar_vegetacion(baya)
 
-for i in range(5):
-    simulacion.agregar_humano(Humano(
-        nombre=f"Arthur {i+1}",
-        edad=random.randint(20, 30),
-        sexo=random.choice(["Macho", "Hembra"]),
-        personalidad=random.choice(["Cazador", "Recolector", "Explorador"])
-    ))
+#
+# for i in range(5):
+#     simulacion.agregar_humano(Humano(
+#         nombre=f"Arthur {i+1}",
+#         edad=random.randint(20, 30),
+#         sexo=random.choice(["Macho", "Hembra"]),
+#         personalidad=random.choice(["Cazador", "Recolector", "Explorador"])
+#     ))
 
 # # Ejecutar ciclos de simulación
 # for ciclo in range(360):
@@ -63,9 +64,9 @@ for i in range(5):
 # ecosistema.imprimir_estados()
 
 # Realizar experimentos
-
-
 simulacion.realizar_experimento("Supervivencia", simulacion.experimento_supervivencia)
+# print("="*20)
+# simulacion.imprimir_historial_eventos()
 
 # Graficar historial de la simulación
 simulacion.graficar_historial()

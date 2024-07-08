@@ -1,0 +1,22 @@
+{
+  "dimensiones": {
+    "alto": 5,
+    "ancho": 5
+  },
+  "terrenos": {
+    "leyenda": {
+      "sabana": "S",
+      "desierto": "D",
+      "pantano": "P",
+      "Acantilado": "A",
+      "Agua": "W"
+    },
+    "mapa": [
+      ["S", "S", "S", "S", "S"],
+      ["S", "S", "S", "S", "S"],
+      ["S", "S", "S", "S", "S"],
+      ["S", "S", "S", "S", "W"],
+      ["S", "S", "S", "W", "W"]
+    ]
+  }
+}

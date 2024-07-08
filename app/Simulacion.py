@@ -46,9 +46,11 @@ class Simulacion:
             entidad = reporte["entidad"]
             especie = entidad.especie
             posicion = entidad.posicion
+            mensaje = ""
 
             if reporte["tipo"] == "muerte":
-                mensaje = f"{especie} ({posicion[0]},{posicion[1]}) muere."
+                causa = reporte["detalles"]["causa"]
+                mensaje = f"{especie} ({posicion[0]},{posicion[1]}) muere por causa ({causa})."
             elif reporte["tipo"] == "tomar_agua":
                 vecindad = reporte["detalles"]["vecindad"]
                 mensaje = f"{especie} ({posicion[0]},{posicion[1]}) toma agua en ({vecindad[0]},{vecindad[1]})"
@@ -117,8 +119,21 @@ class Simulacion:
                 nuevo_bebe = reporte["detalles"]["nuevo_bebe"]
                 mensaje = f"{especie} ({posicion[0]},{posicion[1]}) ha dado a luz a un bebé ({nuevo_bebe.sexo}) [Bebé en ({posicion[0]},{posicion[1]})]"
 
-            evento = Evento(tiempo=tiempo, entidad=entidad, tipo=reporte["tipo"], detalles=reporte["detalles"])
+            evento = Evento(tiempo=tiempo, entidad=entidad, tipo=reporte["tipo"], mensaje=mensaje, detalles=reporte["detalles"])
             self.historial.append(evento)
+
+    def imprimir_historial_eventos(self):
+        for evento in self.historial:
+            print(evento)
+
+    def obtener_eventos_por_tipo(self, tipo):
+        return [evento for evento in self.historial if evento.tipo == tipo]
+
+    def obtener_eventos_por_entidad(self, entidad):
+        return [evento for evento in self.historial if evento.entidad == entidad]
+
+    def obtener_eventos_por_tipo_y_especie(self,  tipo, especie):
+        return [evento for evento in self.historial if evento.entidad.especie == especie and evento.tipo == tipo]
 
     def actualizar_estado_fisiologico(self, hambre, sed, cansancio):
         self.niveles_promedios["hambre"].append(hambre)
@@ -134,7 +149,12 @@ class Simulacion:
         print(f"Total de nacimientos: {self.total_nacimientos}")
         print(f"Total de muertes: {self.total_muertes}")
         print(f"Total de acciones realizadas: {self.total_acciones_realizadas}")
-        print(f"Edad promedio de muerte: {sum(self.edad_promedio_muerte)/len(self.edad_promedio_muerte) if self.edad_promedio_muerte else 0}")
+        print(f"Total de nacidos: {len([p for p in self.obtener_eventos_por_tipo('crecer') if p.detalles['acción'] == 'dar a luz'])}")
+        print(f"Edad promedio de muerte: {(sum(self.edad_promedio_muerte)/len(self.edad_promedio_muerte)) / 360 if self.edad_promedio_muerte else 0}")
+        print(f"Total de muertes por ataque: {len([p for p in self.obtener_eventos_por_tipo('atacar') if p.detalles['presa'].especie == 'Humano'])}")
+        print(f"Total de muertes por sed: {len([p for p in self.obtener_eventos_por_tipo_y_especie('muerte', 'Humano') if p.detalles['causa'] == 'sed'])}")
+        print(f"Total de muertes por hambre: {len([p for p in self.obtener_eventos_por_tipo_y_especie('muerte', 'Humano') if p.detalles['causa'] == 'hambre'])}")
+        print(f"Total de muertes por edad: {len([p for p in self.obtener_eventos_por_tipo_y_especie('muerte', 'Humano') if p.detalles['causa'] == 'edad'])}")
         print(f"Acciones por tipo: {self.acciones_por_tipo}")
         print(f"Exitos por accion: {self.exitos_por_accion}")
         print(f"Fracasos por accion: {self.fracasos_por_accion}")
@@ -192,12 +212,21 @@ class Simulacion:
             self.agregar_humano(humano)
 
         # Ejecutar simulación por un número determinado de días
-        dias_simulacion = 100
+        dias_simulacion = 72000 # 200 anios
         for _ in range(dias_simulacion):
+            if _ % 30 == 0:
+                print(f"Simulando mes {_/30}")
+
             reportes = self.ecosistema.ciclo()
             self.registrar_eventos(reportes)
 
+            if not self.ecosistema.animales:
+                break
+
             for evento in reportes:
+                print(evento)
+                print("   ======   ")
+
                 if not isinstance(evento["entidad"], Humano):
                     continue
 

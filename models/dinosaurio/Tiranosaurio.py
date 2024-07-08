@@ -25,7 +25,7 @@ class Tiranosaurio(Carnivoro):
             if not self.is_alive:
                 return
 
-            self.comprobar_informacion()
+            self.comprobar_informacion(ecosistema)
 
             if self.is_hambriento and self.alimentarse(ecosistema, reportes):
                 return

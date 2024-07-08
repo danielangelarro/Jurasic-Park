@@ -92,10 +92,10 @@ class Animal:
 
         return _defensa
 
-    def comprobar_informacion(self):
+    def comprobar_informacion(self, ecosistema):
         objetos_visibles = [
             obj for obj in self.informacion_manada
-            if self.posicion_en_area_vision(obj.posicion)
+            if self.posicion_en_area_vision(ecosistema, obj.posicion)
         ]
         for obj in objetos_visibles:
             self.informacion_manada.remove(obj)
@@ -133,9 +133,9 @@ class Animal:
                         ecosistema.es_posicion_valida(nueva_posicion, self.habitat)):
                     entidad = ecosistema.entidades_en_posicion(nueva_posicion)
                     visitados.add(nueva_posicion)
+                    objetos.append(nueva_posicion)
 
                     if not entidad or self.especie == "pteranodonte":
-                        objetos.append(nueva_posicion)
                         queue.put_nowait((nueva_posicion, distancia + 1))
 
         return objetos
@@ -190,26 +190,56 @@ class Animal:
         return objetos
 
     def crecer(self, ecosistema, reportes):
+        self.peso -= 0.2
 
         if self.is_alive:
             self.edad += 1
+            self.sed += 1
 
-        self.peso -= 0.2
-        self.sed += 1
+            if self.edad > self.max_edad:
+                self.sed = 0
+                self.is_alive = False
+                reportes.append({
+                    "entidad": self,
+                    "tipo": "muerte",
+                    "detalles": {
+                        "causa": "edad"
+                    }
+                })
 
-        if (self.edad > self.max_edad
-                or (self.get_etapa_edad == Etapa_Edad.ADULTO and self.peso < self.min_peso)
-                or self.sed > 7):
-            self.is_alive = False
+            if self.get_etapa_edad == Etapa_Edad.ADULTO and self.peso < self.min_peso:
+                self.sed = 0
+                self.is_alive = False
+                reportes.append({
+                    "entidad": self,
+                    "tipo": "muerte",
+                    "detalles": {
+                        "causa": "hambre"
+                    }
+                })
 
-        if self.get_etapa_edad != Etapa_Edad.HUEVO and self.peso <= 0:
-            self.is_alive = False
-            reportes.append({
-                "entidad": self,
-                "tipo": "muerte",
-                "detalles": {}
-            })
-            ecosistema.animales.remove(self)
+            if self.sed > 7:
+                self.sed = 0
+                self.is_alive = False
+                reportes.append({
+                    "entidad": self,
+                    "tipo": "muerte",
+                    "detalles": {
+                        "causa": "sed"
+                    }
+                })
+
+        else:
+            if self.get_etapa_edad != Etapa_Edad.HUEVO and self.peso <= 0:
+                self.is_alive = False
+                reportes.append({
+                    "entidad": self,
+                    "tipo": "muerte",
+                    "detalles": {
+                        "causa": "descomposicion"
+                    }
+                })
+                ecosistema.animales.remove(self)
 
     def alimentarse(self):
         pass
@@ -234,6 +264,8 @@ class Animal:
                         self.posicion = vecindad
                         self.sed = 0
                         return True
+
+        self.acercarse_terreno(ecosistema, reportes, Tipo_Terreno.AGUA)
         return False
 
     def atacar(self, ecosistema, reportes):
@@ -316,13 +348,51 @@ class Animal:
 
         return True
 
-    def acercarse(self, ecosistema, reportes):
+    def acercarse_terreno(self, ecosistema, reportes, terrenos):
+
+        objetos = self.objetos_en_area_vision(ecosistema)
+        posiciones_vision = [obj.posicion for obj in objetos]
+
+        posiciones = self.posicion_en_area_accion(ecosistema)
+        posiciones = [pos for pos in posiciones_vision if ecosistema.terreno_en_posicion(pos) in [terrenos]]
+
+        direccion = (self.posicion, math.inf)
+
+        for posicion in posiciones:
+            distance = 0
+            for pos_vision in posiciones_vision:
+                distance += ecosistema.get_distance(posicion, pos_vision)
+
+            if direccion[1] > distance:
+                direccion = (posicion, distance)
+
+        if direccion[1] == math.inf:
+            return False
+
+        reportes.append({
+            "entidad": self,
+            "tipo": "acercarse",
+            "detalles": {
+                "acción": "acercarse",
+                "terrenos": str(terrenos),
+                "direccion": direccion,
+                "resultado": f"a ({direccion[0][0]},{direccion[0][1]})"
+            }
+        })
+        self.posicion = direccion[0]
+
+        return True
+
+    def acercarse(self, ecosistema, reportes, aumento = 2, especie=None):
         if not self.is_solo(ecosistema):
             return False
 
-        objetos = self.objetos_en_area_vision(ecosistema, 2)
+        if especie is None:
+            especie = self.especie
+
+        objetos = self.objetos_en_area_vision(ecosistema, aumento)
         posiciones = self.posicion_en_area_accion(ecosistema)
-        manada = [obj for obj in objetos if isinstance(obj, Animal) and obj.especie == self.especie]
+        manada = [obj for obj in objetos if isinstance(obj, Animal) and obj.especie == especie]
 
         direccion = (self.posicion, math.inf)
 
@@ -342,6 +412,8 @@ class Animal:
             "tipo": "acercarse",
             "detalles": {
                 "acción": "acercarse",
+                "especie": especie,
+                "direccion": direccion,
                 "resultado": f"a ({direccion[0][0]},{direccion[0][1]})"
             }
         })
@@ -393,7 +465,7 @@ class Animal:
                     informacion.add(obj)
                     algo_que_comunicar = True
                     reportes.append({
-                        "entidad": especie,
+                        "entidad": self,
                         "tipo": "comunicar",
                         "detalles": {
                             "acción": "ver",
