@@ -1,4 +1,6 @@
 import random
+
+from app.utils.info import objetos_en_area_accion
 from models.utils.Types_Enum import Tipo_Entidad
 from models.animal.Animal import Animal
 
@@ -8,7 +10,7 @@ class Herbivoro(Animal):
         super().__init__(especie, Tipo_Entidad.HERBIVORO, *args, **kwargs)
 
     def alimentarse(self, ecosistema, reportes):
-        objetos = super().objetos_en_area_accion(ecosistema)
+        objetos = objetos_en_area_accion(self, ecosistema)
         plantas = [obj for obj in objetos if obj.tipo == Tipo_Entidad.VEGETAL and obj.is_alive]
         if plantas:
             planta = random.choice(plantas)

@@ -224,9 +224,6 @@ class Simulacion:
                 break
 
             for evento in reportes:
-                print(evento)
-                print("   ======   ")
-
                 if not isinstance(evento["entidad"], Humano):
                     continue
 

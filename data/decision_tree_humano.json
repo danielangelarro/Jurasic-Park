@@ -35,11 +35,11 @@
       },
       {
         "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
+        "true": "aparearse_humano"
       },
       {
         "condition": "genetica.Fuerza > 60",
-        "true": "atacar"
+        "true": "atacar_humano"
       },
       {
         "condition": "True",
@@ -75,7 +75,7 @@
       },
       {
         "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
+        "true": "aparearse_humano"
       },
       {
         "condition": "True",
@@ -119,11 +119,11 @@
       },
       {
         "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
+        "true": "aparearse_humano"
       },
       {
         "condition": "genetica.Fuerza > 60",
-        "true": "atacar"
+        "true": "atacar_humano"
       },
       {
         "condition": "True",
@@ -183,11 +183,11 @@
       },
       {
         "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
+        "true": "aparearse_humano"
       },
       {
         "condition": "genetica.Fuerza > 60",
-        "true": "atacar"
+        "true": "atacar_humano"
       },
       {
         "condition": "True",
@@ -235,11 +235,11 @@
       },
       {
         "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
+        "true": "aparearse_humano"
       },
       {
         "condition": "genetica.Fuerza > 60",
-        "true": "atacar"
+        "true": "atacar_humano"
       },
       {
         "condition": "True",

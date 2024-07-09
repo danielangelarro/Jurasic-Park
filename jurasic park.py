@@ -10,7 +10,7 @@ from models.humano.Humano import Humano
 
 from app.Ecosistema import Ecosistema
 from app.Simulacion import Simulacion
-from app.utils import cargar_mapa
+from app.utils_map import cargar_mapa
 
 
 # Cargar el mapa

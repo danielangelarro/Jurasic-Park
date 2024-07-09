@@ -1,4 +1,7 @@
 import random
+
+from app.utils.actions import atacar
+from app.utils.info import objetos_en_area_accion, ataque, defensa, get_etapa_edad
 from models.utils.Types_Enum import Tipo_Entidad, Etapa_Edad
 from models.animal.Animal import Animal
 
@@ -8,14 +11,14 @@ class Carnivoro(Animal):
         super().__init__(especie, Tipo_Entidad.CARNIVORO, *args, **kwargs)
 
     def atacar(self, ecosistema, reportes):
-        if super().atacar(ecosistema, reportes):
+        if atacar(self, ecosistema, reportes):
             return
 
-        objetos = super().objetos_en_area_accion(ecosistema)
+        objetos = objetos_en_area_accion(self, ecosistema)
         presas = [
             obj for obj in objetos
             if isinstance(obj, Animal) and obj.especie != self.especie and
-               obj.is_alive and self.ataque(ecosistema, obj) > obj.defensa(ecosistema)
+               obj.is_alive and ataque(self, ecosistema, obj) > defensa(obj, ecosistema)
         ]
         if presas:
             presa = random.choice(presas)
@@ -29,16 +32,16 @@ class Carnivoro(Animal):
                         "especie": presa.especie,
                         "posicion": presa.posicion
                     },
-                    "resultado_ataque": f"{self.ataque(ecosistema, presa)} vs {presa.defensa(ecosistema)}"
+                    "resultado_ataque": f"{ataque(self, ecosistema, presa)} vs {defensa(presa, ecosistema)}"
                 }
             })
 
     def alimentarse(self, ecosistema, reportes):
-        objetos = super().objetos_en_area_accion(ecosistema)
+        objetos = objetos_en_area_accion(self, ecosistema)
         presas = [
             obj for obj in objetos
             if isinstance(obj, Animal) and
-                (obj.get_etapa_edad == Etapa_Edad.HUEVO or not obj.is_alive)
+                (get_etapa_edad(obj) == Etapa_Edad.HUEVO or not obj.is_alive)
         ]
         if presas:
             presa = presas[0]

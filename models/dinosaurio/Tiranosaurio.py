@@ -1,3 +1,5 @@
+from app.utils.actions import beber, atacar, aparearse, moverse, crecer
+from app.utils.info import comprobar_informacion, is_hambriento, is_sediento
 from models.animal.Carnivoro import Carnivoro
 from models.utils.Types_Enum import Tipo_Terreno
 
@@ -21,30 +23,30 @@ class Tiranosaurio(Carnivoro):
         )
 
     def decidir_accion(self, ecosistema, reportes):
-        def hacer_accion():
+        def hacer_accion(self=None):
             if not self.is_alive:
                 return
 
-            self.comprobar_informacion(ecosistema)
+            comprobar_informacion(self, ecosistema)
 
-            if self.is_hambriento and self.alimentarse(ecosistema, reportes):
+            if is_hambriento(self) and self.alimentarse(ecosistema, reportes):
                 return
 
-            if self.is_sediento and self.beber(ecosistema, reportes):
+            if is_sediento(self) and beber(self, ecosistema, reportes):
                 return
 
             if self.cansancio > 8:
                 # Implementar lógica de descansar
                 return
 
-            if self.atacar(ecosistema, reportes):
+            if atacar(self, ecosistema, reportes):
                 return
 
-            if self.peso >= self.max_peso and self.aparearse(ecosistema, reportes):
+            if self.peso >= self.max_peso and aparearse(self, ecosistema, reportes):
                 return
 
-            if self.moverse(ecosistema, reportes):
+            if moverse(self, ecosistema, reportes):
                 return
 
         hacer_accion()
-        self.crecer(ecosistema, reportes)
+        crecer(self, ecosistema, reportes)

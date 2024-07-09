@@ -1,5 +1,7 @@
 import random
 
+from app.utils.actions import beber, huir, aparearse, atacar, comunicar, gritar, acercarse, moverse, crecer
+from app.utils.info import comprobar_informacion, is_hambriento, is_sediento, is_solo
 from models.animal.Herbivoro import Herbivoro
 from models.utils.Types_Enum import Tipo_Terreno
 
@@ -27,40 +29,40 @@ class Triceratops(Herbivoro):
             if not self.is_alive:
                 return
 
-            self.comprobar_informacion(ecosistema)
+            comprobar_informacion(self, ecosistema)
 
-            if self.is_hambriento and self.alimentarse(ecosistema, reportes):
+            if is_hambriento(self) and self.alimentarse(ecosistema, reportes):
                 return
 
-            if self.is_sediento and self.beber(ecosistema, reportes):
+            if is_sediento(self) and beber(self, ecosistema, reportes):
                 return
 
             if self.cansancio > 8:
                 # Implementar lógica de descansar
                 return
 
-            if self.huir(ecosistema, reportes):
+            if huir(self, ecosistema, reportes):
                 return
 
-            if not self.is_hambriento and self.aparearse(ecosistema, reportes):
+            if not is_hambriento(self) and aparearse(self, ecosistema, reportes):
                 return
 
-            if self.atacar(ecosistema, reportes):
+            if atacar(self, ecosistema, reportes):
                 return
 
-            if self.comunicar(ecosistema, reportes):
+            if comunicar(self, ecosistema, reportes):
                 return
 
             opcion = random.choice([True, False])
 
-            if self.is_solo(ecosistema) and opcion and self.gritar(ecosistema, reportes):
+            if is_solo(self, ecosistema) and opcion and gritar(self, ecosistema, reportes):
                 return
 
-            if self.is_solo(ecosistema) and not opcion and self.acercarse(ecosistema, reportes):
+            if is_solo(self, ecosistema) and not opcion and acercarse(self, ecosistema, reportes):
                 return
 
-            if self.moverse(ecosistema, reportes):
+            if moverse(self, ecosistema, reportes):
                 return
 
         hacer_accion()
-        self.crecer(ecosistema, reportes)
+        crecer(self, ecosistema, reportes)

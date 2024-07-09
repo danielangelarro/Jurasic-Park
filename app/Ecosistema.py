@@ -1,7 +1,11 @@
 import random
 
+from app.utils.info import *
+from app.utils.actions import *
+from app.utils_map import load_json
+from app.utils_map import mapper_to_name
+from app.utils_map import mapper_to_entity
 from models.utils.Types_Enum import Tipo_Terreno
-from app.utils import mapper_to_entity
 
 
 class Ecosistema:
@@ -76,6 +80,40 @@ class Ecosistema:
         ]
         return [pos for pos in posiciones if self.es_posicion_valida(pos)]
 
+    def decidir_accion(self, entidad, reportes):
+        decision_tree = load_json("decision_tree_humano")
+        terrenos = [terreno["tipo"] for terreno in terreno_en_area_accion(entidad, self)]
+        terrenos = set([mapper_to_name[terreno] for terreno in terrenos])
+        attributes = entidad.get_all_attributes()
+        entidad.objetos_en_area_vision = objetos_en_area_vision(entidad, self)
+        entidad.objetos_en_area_accion = objetos_en_area_accion(entidad, self)
+
+        def hacer_accion():
+            if not entidad.is_alive:
+                return False
+
+            for accion in acciones:
+                condition = accion["condition"]
+                if eval(condition, {}, attributes):
+                    metodo = accion["true"]
+                    if metodo == "return":
+                        return False
+                    # if hasattr(entidad, metodo):
+                    if eval(metodo)(entidad, self, reportes):
+                        return True
+            return False
+
+        accion_realizada = False
+        for terreno in terrenos:
+            acciones = decision_tree[terreno]["acciones"]
+            if hacer_accion():
+                accion_realizada = True
+                break
+
+        if not accion_realizada:
+            moverse(entidad, self, reportes)
+        crecer_humano(entidad, self, reportes)
+
     def ciclo(self):
         self.days += 1
         reportes = []
@@ -83,7 +121,10 @@ class Ecosistema:
             vegetal.crecer(self, reportes)
 
         for animal in self.animales:
-            animal.decidir_accion(self, reportes)
+            if isinstance(animal, Humano):
+                self.decidir_accion(animal, reportes)
+            else:
+                animal.decidir_accion(self, reportes)
         return reportes
 
     def imprimir_estados(self):
