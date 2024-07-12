@@ -1,6 +1,7 @@
 import random
 
 import matplotlib.pyplot as plt
+from collections import Counter
 
 from app.Ecosistema import Ecosistema
 from models.humano.Humano import Humano
@@ -12,7 +13,6 @@ class Simulacion:
         self.ecosistema = ecosistema
         self.total_humanos = 0
         self.total_nacimientos = 0
-        self.total_muertes = 0
         self.total_acciones_realizadas = 0
         self.edad_promedio_muerte = []
         self.acciones_por_tipo = {accion: 0 for accion in ["cazar", "recolectar", "pescar", "descansar", "construir", "buscar_refugio", "huir", "comunicar", "aparearse", "acercarse", "gritar", "moverse", "beber", "atacar"]}
@@ -25,8 +25,8 @@ class Simulacion:
 
     def agregar_humano(self, humano):
         self.ecosistema.agregar_animal(humano)
+        self.ecosistema.total_humanos += 1
         self.total_humanos += 1
-        # self.humanos_por_area[humano.area] += 1
 
     def registrar_accion(self, accion, exito=True):
         self.total_acciones_realizadas += 1
@@ -37,7 +37,6 @@ class Simulacion:
             self.fracasos_por_accion[accion] += 1
 
     def registrar_muerte(self, entidad):
-        self.total_muertes += 1
         self.edad_promedio_muerte.append(entidad.edad)
 
     def registrar_eventos(self, reportes):
@@ -62,6 +61,10 @@ class Simulacion:
             elif reporte["tipo"] == "movimiento":
                 nueva_posicion = reporte["detalles"]["nueva_posicion"]
                 mensaje = f"{especie} ({posicion[0]},{posicion[1]}) se mueve a ({nueva_posicion[0]},{nueva_posicion[1]})"
+            elif reporte["tipo"] == "alimentarse":
+                comida = reporte["detalles"]["comida"]
+                peso = reporte["detalles"]["peso"]
+                mensaje = f"{especie} ({posicion[0]},{posicion[1]}) a comido ({comida}), peso actual ({peso})"
             elif reporte["tipo"] == "huir":
                 direccion = reporte["detalles"]["direccion"]
                 mensaje = f"{especie} ({posicion[0]},{posicion[1]}) huye a ({direccion[0][0]},{direccion[0][1]})"
@@ -122,6 +125,8 @@ class Simulacion:
             evento = Evento(tiempo=tiempo, entidad=entidad, tipo=reporte["tipo"], mensaje=mensaje, detalles=reporte["detalles"])
             self.historial.append(evento)
 
+        self.historial_humanos.append(len([a for a in self.ecosistema.animales if isinstance(a, Humano)]))
+
     def imprimir_historial_eventos(self):
         for evento in self.historial:
             print(evento)
@@ -144,101 +149,79 @@ class Simulacion:
         resultado = func(*args, **kwargs)
         self.experimentos.append((nombre, resultado))
 
-    def imprimir_estadisticas(self):
-        print(f"Total de humanos: {self.total_humanos}")
-        print(f"Total de nacimientos: {self.total_nacimientos}")
-        print(f"Total de muertes: {self.total_muertes}")
-        print(f"Total de acciones realizadas: {self.total_acciones_realizadas}")
-        print(f"Total de nacidos: {len([p for p in self.obtener_eventos_por_tipo('crecer') if p.detalles['acción'] == 'dar a luz'])}")
-        print(f"Edad promedio de muerte: {(sum(self.edad_promedio_muerte)/len(self.edad_promedio_muerte)) / 360 if self.edad_promedio_muerte else 0}")
-        print(f"Total de muertes por ataque: {len([p for p in self.obtener_eventos_por_tipo('atacar') if p.detalles['presa'].especie == 'Humano'])}")
-        print(f"Total de muertes por sed: {len([p for p in self.obtener_eventos_por_tipo_y_especie('muerte', 'Humano') if p.detalles['causa'] == 'sed'])}")
-        print(f"Total de muertes por hambre: {len([p for p in self.obtener_eventos_por_tipo_y_especie('muerte', 'Humano') if p.detalles['causa'] == 'hambre'])}")
-        print(f"Total de muertes por edad: {len([p for p in self.obtener_eventos_por_tipo_y_especie('muerte', 'Humano') if p.detalles['causa'] == 'edad'])}")
-        print(f"Acciones por tipo: {self.acciones_por_tipo}")
-        print(f"Exitos por accion: {self.exitos_por_accion}")
-        print(f"Fracasos por accion: {self.fracasos_por_accion}")
-        print(f"Niveles promedios de hambre: {sum(self.niveles_promedios['hambre'])/len(self.niveles_promedios['hambre']) if self.niveles_promedios['hambre'] else 0}")
-        print(f"Niveles promedios de sed: {sum(self.niveles_promedios['sed'])/len(self.niveles_promedios['sed']) if self.niveles_promedios['sed'] else 0}")
-        print(f"Niveles promedios de cansancio: {sum(self.niveles_promedios['cansancio'])/len(self.niveles_promedios['cansancio']) if self.niveles_promedios['cansancio'] else 0}")
-        print(f"Humanos por area: {self.humanos_por_area}")
+    def evaluar_simulacion(self, dias_simulacion):
+        self.total_humanos += self.total_nacimientos
+
+        dias = self.ecosistema.days / dias_simulacion
+        humanos_sobrevivientes = len(self.ecosistema.humanos) / self.total_humanos
+
+        return dias + humanos_sobrevivientes
 
     def graficar_historial(self):
-        dias = [evento.tiempo for evento in self.historial if isinstance(evento.entidad, Humano)]
-        acciones = [evento.tipo for evento in self.historial if isinstance(evento.entidad, Humano)]
 
-        plt.figure(figsize=(10, 5))
-        plt.hist(dias, bins=max(dias), alpha=0.5, label="Días")
-        plt.xticks(range(min(dias), max(dias) + 1))
-        plt.xlabel("Día")
-        plt.ylabel("Cantidad de Eventos")
-        plt.title("Historial de Eventos por Día")
-        plt.legend()
+        dias = self.ecosistema.days
+
+        fig, ax = plt.subplots()
+        ax.plot(range(len(dias)), dias)
+
+        ax.set_title('Cantidad de humanos por día')
+        ax.set_xlabel('Día')
+        ax.set_ylabel('Cantidad de Humanos')
+        ax.grid(True)
+
         plt.show()
 
-        plt.figure(figsize=(10, 5))
-        plt.hist(acciones, bins=len(set(acciones)), alpha=0.5, label="Acciones")
-        plt.xticks(rotation=90)
-        plt.xlabel("Acción")
-        plt.ylabel("Cantidad de Eventos")
-        plt.title("Historial de Acciones Realizadas")
-        plt.legend()
-        plt.show()
-
-    def experimento_supervivencia(self):
-        # Reiniciar el ecosistema para un nuevo experimento
-        self.ecosistema = Ecosistema(self.ecosistema.mapa)
+    def reset_simulacion(self):
+        self.ecosistema.reset()
         self.total_humanos = 0
         self.total_nacimientos = 0
         self.total_muertes = 0
         self.total_acciones_realizadas = 0
         self.edad_promedio_muerte = []
-        self.acciones_por_tipo = {accion: 0 for accion in ["cazar", "recolectar", "pescar", "descansar", "construir", "buscar_refugio", "huir", "comunicar", "aparearse", "acercarse", "gritar", "moverse", "beber", "atacar"]}
+        self.acciones_por_tipo = {accion: 0 for accion in
+                                  ["cazar", "recolectar", "pescar", "descansar", "construir", "buscar_refugio", "huir",
+                                   "comunicar", "aparearse", "acercarse", "gritar", "moverse", "beber", "atacar"]}
         self.exitos_por_accion = {accion: 0 for accion in self.acciones_por_tipo}
         self.fracasos_por_accion = {accion: 0 for accion in self.acciones_por_tipo}
         self.niveles_promedios = {"hambre": [], "sed": [], "cansancio": []}
         self.humanos_por_area = {area: 0 for area in ["sabana", "desierto", "pradera", "agua", "acantilado", "pantano"]}
         self.experimentos = []
         self.historial = []
+        self.historial_humanos = []
 
         # Agregar humanos al ecosistema
         for i in range(10):  # Por ejemplo, agregamos 10 humanos para iniciar
             humano = Humano(
-                nombre=f"Humano {i+1}",
+                nombre=f"Humano {i + 1}",
                 edad=random.randint(20, 50),
                 sexo=random.choice(["Macho", "Hembra"]),
                 personalidad=random.choice(["Cazador", "Recolector", "Explorador"])
             )
             self.agregar_humano(humano)
 
+    def experimento_supervivencia(self):
         # Ejecutar simulación por un número determinado de días
         dias_simulacion = 72000 # 200 anios
-        for _ in range(dias_simulacion):
-            if _ % 30 == 0:
-                print(f"Simulando mes {_/30}")
+        num_generaciones = 5
 
-            reportes = self.ecosistema.ciclo()
-            self.registrar_eventos(reportes)
+        for generacion in range(num_generaciones):
+            self.reset_simulacion()
 
-            if not self.ecosistema.animales:
-                break
+            for _ in range(dias_simulacion):
+                reportes = self.ecosistema.ciclo()
 
-            for evento in reportes:
-                if not isinstance(evento["entidad"], Humano):
-                    continue
+                if not len(self.ecosistema.humanos):
+                    break
 
-                if evento["tipo"] == "muerte":
-                    self.registrar_muerte(evento["entidad"])
-                elif evento["tipo"] in self.acciones_por_tipo:
-                    exito = evento["detalles"]["resultado"]  # Si el evento tiene éxito o no
-                    self.registrar_accion(evento["tipo"], exito)
+                print(f"Cantidad de eventos: {len(reportes)}")
 
-            # Actualizar niveles promedios de hambre, sed y cansancio
-            niveles_hambre = [humano.is_hambriento for humano in self.ecosistema.animales if isinstance(humano, Humano)]
-            niveles_sed = [humano.is_sediento for humano in self.ecosistema.animales if isinstance(humano, Humano)]
-            niveles_cansancio = [humano.cansancio for humano in self.ecosistema.animales if isinstance(humano, Humano)]
-            if niveles_hambre and niveles_sed and niveles_cansancio:
-                self.actualizar_estado_fisiologico(sum(niveles_hambre) / len(niveles_hambre), sum(niveles_sed) / len(niveles_sed), sum(niveles_cansancio) / len(niveles_cansancio))
+                # for evento in reportes:
+                #     if not isinstance(evento["entidad"], Humano):
+                #         continue
 
-        # Finalización del experimento
-        self.imprimir_estadisticas()
+            print(f"Generación {generacion + 1}:"
+                  f"Evaluación: {self.evaluar_simulacion(self.ecosistema.days)} pts\n"
+                  f"Duración de días: {self.ecosistema.days}/{dias_simulacion}\n"
+                  f"Sobrevivientes: {len(self.ecosistema.humanos)}/{self.total_humanos}\n")
+
+            self.ecosistema.evolucionar()

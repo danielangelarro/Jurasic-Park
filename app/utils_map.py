@@ -1,5 +1,6 @@
 import json
 from models.utils.Types_Enum import Tipo_Terreno
+from colorama import Back
 
 
 def load_json(nombre):
@@ -42,6 +43,15 @@ mapper_to_name = {
     Tipo_Terreno.DESIERTO: "desierto",
     Tipo_Terreno.ACANTILADO: "acantilado",
     Tipo_Terreno.AGUA: "agua"
+}
+
+mapper_to_color = {
+    Tipo_Terreno.SABANA: Back.LIGHTRED_EX,
+    Tipo_Terreno.PANTANO: Back.GREEN,
+    Tipo_Terreno.PRADERA: Back.LIGHTGREEN_EX,
+    Tipo_Terreno.DESIERTO: Back.YELLOW,
+    Tipo_Terreno.ACANTILADO: Back.LIGHTMAGENTA_EX,
+    Tipo_Terreno.AGUA: Back.LIGHTBLUE_EX
 }
 
 

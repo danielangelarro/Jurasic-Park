@@ -4,16 +4,16 @@ import random
 from app.utils.info import terreno_en_area_accion, objetos_en_area_accion, ataque, defensa, posicion_en_area_accion, \
     objetos_en_area_vision, is_hambriento, get_etapa_edad, is_solo
 from models.animal.Animal import Animal
-from models.humano.Humano import Humano
 from models.utils.Types_Enum import Etapa_Edad, Tipo_Terreno, Tipo_Entidad
 
 
 def crecer(entidad_animal, ecosistema, reportes):
-    entidad_animal.peso -= 0.2
+    entidad_animal.peso -= 0.5
 
     if entidad_animal.is_alive:
         entidad_animal.edad += 1
         entidad_animal.sed += 1
+        entidad_animal.sobrevivir += 1
 
         if entidad_animal.edad > entidad_animal.max_edad:
             entidad_animal.sed = 0
@@ -25,6 +25,7 @@ def crecer(entidad_animal, ecosistema, reportes):
                     "causa": "edad"
                 }
             })
+            return False
 
         if get_etapa_edad(entidad_animal) == Etapa_Edad.ADULTO and entidad_animal.peso < entidad_animal.min_peso:
             entidad_animal.sed = 0
@@ -36,6 +37,7 @@ def crecer(entidad_animal, ecosistema, reportes):
                     "causa": "hambre"
                 }
             })
+            return False
 
         if entidad_animal.sed > 7:
             entidad_animal.sed = 0
@@ -47,6 +49,7 @@ def crecer(entidad_animal, ecosistema, reportes):
                     "causa": "sed"
                 }
             })
+            return False
 
     else:
         if get_etapa_edad(entidad_animal) != Etapa_Edad.HUEVO and entidad_animal.peso <= 0:
@@ -58,15 +61,25 @@ def crecer(entidad_animal, ecosistema, reportes):
                     "causa": "descomposicion"
                 }
             })
-            ecosistema.animales.remove(entidad_animal)
+
+            if entidad_animal in ecosistema.animales:
+                ecosistema.animales.remove(entidad_animal)
+                ecosistema.cementerio_animales.append(entidad_animal)
+
+            elif entidad_animal in ecosistema.humanos:
+                ecosistema.humanos.remove(entidad_animal)
+                ecosistema.cementerio_humanos.append(entidad_animal)
+
+            return True
+    return True
 
 
 def beber(entidad_animal, ecosistema, reportes):
-    terrenos = terreno_en_area_accion(entidad_animal, ecosistema)
+    terrenos = entidad_animal.terreno_en_area_accion
 
     for terreno in terrenos:
-        if terreno["tipo"] == Tipo_Terreno.AGUA:
-            vecindades = ecosistema.posiciones_vecinas_libres(terreno["posicion"])
+        if terreno[0] == Tipo_Terreno.AGUA:
+            vecindades = ecosistema.posiciones_vecinas_libres(terreno[1])
 
             for vecindad in vecindades:
                 if ecosistema.terreno_en_posicion(vecindad) != Tipo_Terreno.AGUA:
@@ -119,10 +132,10 @@ def moverse(entidad_animal, ecosistema, reportes):
         if huevo:
             return
 
-    posiciones = posicion_en_area_accion(entidad_animal, ecosistema)
+    posiciones = entidad_animal.posicion_en_area_accion
 
     if posiciones:
-        nueva_posicion = random.choice(posiciones)
+        nueva_posicion = random.choice(list(posiciones))
         reportes.append({
             "entidad": entidad_animal,
             "tipo": "moverse",
@@ -138,8 +151,8 @@ def moverse(entidad_animal, ecosistema, reportes):
 
 
 def huir(entidad_animal, ecosistema, reportes):
-    objetos = objetos_en_area_vision(entidad_animal, ecosistema, 2)
-    posiciones = posicion_en_area_accion(entidad_animal, ecosistema)
+    objetos = entidad_animal.objetos_en_area_vision
+    posiciones = entidad_animal.posicion_en_area_accion
     predadores = [obj for obj in objetos if obj.tipo == Tipo_Entidad.CARNIVORO and obj.especie != entidad_animal.especie]
 
     direccion = (entidad_animal.posicion, 0)
@@ -172,7 +185,7 @@ def acercarse_terreno(entidad_animal, ecosistema, reportes, terrenos):
     objetos = entidad_animal.objetos_en_area_vision
     posiciones_vision = [obj.posicion for obj in objetos]
 
-    posiciones = posicion_en_area_accion(entidad_animal, ecosistema)
+    posiciones = entidad_animal.posicion_en_area_accion
     posiciones = [pos for pos in posiciones_vision if ecosistema.terreno_en_posicion(pos) in [terrenos]]
 
     direccion = (entidad_animal.posicion, math.inf)
@@ -210,8 +223,8 @@ def acercarse(entidad_animal, ecosistema, reportes, aumento=2, especie=None):
     if especie is None:
         especie = entidad_animal.especie
 
-    objetos = objetos_en_area_vision(entidad_animal, ecosistema, aumento)
-    posiciones = posicion_en_area_accion(entidad_animal, ecosistema)
+    objetos = entidad_animal.objetos_en_area_vision
+    posiciones = entidad_animal.posicion_en_area_accion
     manada = [obj for obj in objetos if isinstance(obj, Animal) and obj.especie == especie]
 
     direccion = (entidad_animal.posicion, math.inf)
@@ -246,7 +259,7 @@ def gritar(entidad_animal, ecosistema, reportes):
     if not is_solo(entidad_animal, ecosistema):
         return False
 
-    objetos = objetos_en_area_vision(entidad_animal, ecosistema, 2)
+    objetos = entidad_animal.objetos_en_area_vision
     manada = [obj for obj in objetos if isinstance(obj, Animal) and obj.especie == entidad_animal.especie]
 
     if manada:
@@ -357,10 +370,10 @@ def descansar(entidad_animal, ecosistema, reportes):
 
 
 def cazar(entidad_animal, ecosistema, reportes):
-    terrenos = terreno_en_area_accion(entidad_animal, ecosistema)
+    terrenos = entidad_animal.terreno_en_area_accion
     terrenos_caza = [
         obj for obj in terrenos
-        if obj["tipo"] in (Tipo_Terreno.SABANA, Tipo_Terreno.PRADERA)
+        if obj[0] in (Tipo_Terreno.SABANA, Tipo_Terreno.PRADERA)
     ]
 
     if not terrenos_caza or entidad_animal.peso >= entidad_animal.max_peso or not is_hambriento(entidad_animal):
@@ -368,9 +381,12 @@ def cazar(entidad_animal, ecosistema, reportes):
         return False
 
     exito = (entidad_animal.genetica.Fuerza + entidad_animal.genetica.Velocidad + entidad_animal.genetica.Adaptabilidad) / 3
+    comida_obtenida = max(0, int(exito * random.uniform(0.5, 1.5)))
+
+    entidad_animal.inventario["comida"] += comida_obtenida
+    entidad_animal.cansancio += 2
     entidad_animal.habilidades.Caza += 1 if exito > 50 else 0
-    comida_obtenida = exito / 10
-    entidad_animal.modificar_estado(peso=int(comida_obtenida), cansancio=10)
+
     reportes.append({
         "entidad": entidad_animal,
         "tipo": "cazar",
@@ -378,7 +394,6 @@ def cazar(entidad_animal, ecosistema, reportes):
             "acción": "cazar",
             "resultado": f"Comida obtenida: {comida_obtenida}. "
                          f"Nueva habilidad de caza: {entidad_animal.habilidades.Caza}. "
-                         f"Nivel de peso: {entidad_animal.peso}. "
                          f"Nivel de cansancio: {entidad_animal.cansancio}"
         }
     })
@@ -387,10 +402,10 @@ def cazar(entidad_animal, ecosistema, reportes):
 
 
 def recolectar(entidad_animal, ecosistema, reportes):
-    terrenos = terreno_en_area_accion(entidad_animal, ecosistema)
+    terrenos = entidad_animal.terreno_en_area_accion
     terrenos_recoleccion = [
         obj for obj in terrenos
-        if obj["tipo"] in (Tipo_Terreno.SABANA, Tipo_Terreno.PRADERA)
+        if obj[0] in (Tipo_Terreno.SABANA, Tipo_Terreno.PRADERA)
     ]
 
     if not terrenos_recoleccion or entidad_animal.peso >= entidad_animal.max_peso or not is_hambriento(entidad_animal):
@@ -398,17 +413,19 @@ def recolectar(entidad_animal, ecosistema, reportes):
         return False
 
     exito = (entidad_animal.genetica.Inteligencia + entidad_animal.genetica.Velocidad + entidad_animal.genetica.Adaptabilidad) / 3
+
+    comida_obtenida = max(0, int(exito * random.uniform(0.5, 1.5)))
+    entidad_animal.inventario["comida"] += comida_obtenida
+    entidad_animal.cansancio += 1
     entidad_animal.habilidades.Recoleccion += 1 if exito > 50 else 0
-    recursos_obtenidos = exito / 10
-    entidad_animal.modificar_estado(peso=int(recursos_obtenidos), cansancio=5)
+
     reportes.append({
         "entidad": entidad_animal,
         "tipo": "recolectar",
         "detalles": {
             "acción": "recolectar",
-            "resultado": f"Recursos obtenidos: {recursos_obtenidos}. "
+            "resultado": f"Recursos obtenidos: {comida_obtenida}. "
                          f"Nueva habilidad de recolección: {entidad_animal.habilidades.Recoleccion}. "
-                         f"Nivel de peso: {entidad_animal.peso}. "
                          f"Nivel de cansancio: {entidad_animal.cansancio}"
         }
     })
@@ -416,10 +433,10 @@ def recolectar(entidad_animal, ecosistema, reportes):
     return True
 
 def pescar(entidad_animal, ecosistema, reportes):
-    terrenos = terreno_en_area_accion(entidad_animal, ecosistema)
+    terrenos = entidad_animal.terreno_en_area_accion
     terrenos_recoleccion = [
         obj for obj in terrenos
-        if obj["tipo"] == Tipo_Terreno.AGUA
+        if obj[0] == Tipo_Terreno.AGUA
     ]
 
     if not terrenos_recoleccion or entidad_animal.peso >= entidad_animal.max_peso or not is_hambriento(entidad_animal):
@@ -427,23 +444,48 @@ def pescar(entidad_animal, ecosistema, reportes):
         return False
 
     exito = (entidad_animal.habilidades.Pesca + entidad_animal.genetica.Inteligencia + entidad_animal.genetica.Fuerza) / 3
+
+    comida_obtenida = max(0, int(exito * random.uniform(0.5, 1.5)))
+    entidad_animal.inventario["comida"] += comida_obtenida
+    entidad_animal.cansancio += 1.5
     entidad_animal.habilidades.Pesca += 1 if exito > 50 else 0
-    peces_obtenidos = exito / 10
-    entidad_animal.modificar_estado(peso=int(peces_obtenidos), cansancio=5)
+
     reportes.append({
         "entidad": entidad_animal,
         "tipo": "pescar",
         "detalles": {
             "acción": "pescar",
-            "resultado": f"Peces obtenidos: {peces_obtenidos}. "
+            "resultado": f"Peces obtenidos: {comida_obtenida}. "
                          f"Nueva habilidad de pesca: {entidad_animal.habilidades.Pesca}. "
-                         f"Nivel de peso: {entidad_animal.peso}. "
                          f"Nivel de cansancio: {entidad_animal.cansancio}"
         }
     })
 
     return True
 
+
+def alimentarse_humano(entidad_animal, ecosistema, reportes):
+    if entidad_animal.is_hambriento and entidad_animal.inventario["comida"] > 0:
+
+        hambre = entidad_animal.max_peso - entidad_animal.peso
+        comida = min(hambre, entidad_animal.inventario["comida"])
+
+        entidad_animal.inventario["comida"] -= comida
+        entidad_animal.modificar_estado(peso=comida)
+
+        reportes.append({
+            "entidad": entidad_animal,
+            "tipo": "alimentarse",
+            "detalles": {
+                "acción": "alimentarse",
+                "comida": f"{comida}.",
+                "peso": f"{entidad_animal.peso}"
+            }
+        })
+
+        return True
+    else:
+        return False
 
 def atacar_humano(entidad_animal, ecosistema, reportes):
     if atacar(entidad_animal, ecosistema, reportes):
@@ -521,7 +563,7 @@ def avanzar_gestacion(entidad_animal, ecosistema, reportes):
 
         if entidad_animal.gestation_period <= 0:
             entidad_animal.is_pregnant = False
-            nuevo_bebe = Humano(
+            nuevo_bebe = entidad_animal.__class__(
                 nombre=f"{entidad_animal.nombre} Jr.",
                 edad=0,
                 genetica=entidad_animal.genetica, habilidades=entidad_animal.habilidades,
@@ -529,7 +571,7 @@ def avanzar_gestacion(entidad_animal, ecosistema, reportes):
                 sexo=random.choice(["Macho", "Hembra"])
             )
             entidad_animal.crias.append(nuevo_bebe)
-            ecosistema.animales.append(nuevo_bebe)
+            ecosistema.humanos.append(nuevo_bebe)
             reportes.append({
                 "entidad": entidad_animal,
                 "tipo": "crecer",

@@ -1,5 +1,7 @@
+import numpy as np
+
 from models.animal.Animal import Animal
-from models.utils.Types_Enum import Etapa_Edad
+from models.utils.Types_Enum import Etapa_Edad, Tipo_Terreno
 from queue import SimpleQueue
 
 
@@ -9,7 +11,7 @@ def is_hambriento(entidad_animal: Animal):
 
 
 def is_sediento(entidad_animal: Animal):
-    return entidad_animal.sed > 3
+    return entidad_animal.sed > 2
 
 
 def is_solo(entidad_animal: Animal, ecosistema):
@@ -24,7 +26,7 @@ def ataque(entidad_animal: Animal, ecosistema, presa):
     manada = [
         obj for obj in ecosistema.animales
         if obj.especie == entidad_animal.especie and
-           presa in objetos_en_area_accion(obj, ecosistema)
+           presa in obj.objetos_en_area_accion
     ]
     atk += sum([m._ataque * 0 if m.custodiando_huevo else 1 for m in manada])
 
@@ -58,25 +60,24 @@ def comprobar_informacion(entidad_animal: Animal, ecosistema):
 
 
 def posicion_en_area_vision(entidad_animal: Animal, ecosistema, posicion):
-    objetos = objetos_en_area_vision(entidad_animal, ecosistema)
-    posiciones = [obj.posicion for obj in objetos]
+    objetos = entidad_animal.objetos_en_area_vision
+    posiciones = set([obj.posicion for obj in objetos])
 
     return posicion in posiciones
 
 
 def posicion_en_area_accion(entidad_animal: Animal, ecosistema):
-    objetos = []
 
-    direcciones = [
+    direcciones = np.array([
         (-1, -1), (-1, 0), (-1, 1),
         (0, -1), (0, 1),
         (1, -1), (1, 0), (1, 1)
-    ]
+    ])
 
     visitados = set()
 
     queue = SimpleQueue()
-    queue.put_nowait((entidad_animal.posicion, 0))
+    queue.put_nowait((entidad_animal.posicion, 1))
     visitados.add(entidad_animal.posicion)
 
     while not queue.empty():
@@ -85,42 +86,38 @@ def posicion_en_area_accion(entidad_animal: Animal, ecosistema):
         for x, y in direcciones:
             nueva_posicion = (posicion[0] + x, posicion[1] + y)
             if (distancia <= entidad_animal.alcance_accion and nueva_posicion not in visitados and
-                    ecosistema.es_posicion_valida(nueva_posicion, entidad_animal.habitat)):
-                entidad = ecosistema.entidades_en_posicion(nueva_posicion)
+                    ecosistema.es_posicion_valida(nueva_posicion, entidad_animal.habitat + [Tipo_Terreno.AGUA])):
                 visitados.add(nueva_posicion)
-                objetos.append(nueva_posicion)
+                queue.put_nowait((nueva_posicion, distancia + 1))
 
-                if not entidad or entidad_animal.especie == "pteranodonte":
-                    queue.put_nowait((nueva_posicion, distancia + 1))
-
-    return objetos
+    return visitados
 
 
 def objetos_en_area_accion(entidad_animal: Animal, ecosistema):
-    posiciones = posicion_en_area_accion(entidad_animal, ecosistema)
-    entidades = []
+    posiciones = entidad_animal.posicion_en_area_accion
+    entidades = set()
 
     for posicion in posiciones:
-        entidades.extend(ecosistema.entidades_en_posicion(posicion))
+        entidades.union(ecosistema.entidades_en_posicion(posicion))
 
     return entidades
 
 
 def terreno_en_area_accion(entidad_animal: Animal, ecosistema):
-    posiciones = posicion_en_area_accion(entidad_animal, ecosistema)
-    terrenos = []
+    posiciones = entidad_animal.posicion_en_area_accion
+    terrenos = set()
 
     for posicion in posiciones:
-        terrenos.append({
-            "tipo": ecosistema.terreno_en_posicion(posicion),
-            "posicion": posicion
-        })
+        terrenos.add((
+            ecosistema.terreno_en_posicion(posicion),
+            posicion
+        ))
 
     return terrenos
 
 
 def objetos_en_area_vision(entidad_animal, ecosistema, aumento=1):
-    objetos = []
+    objetos = set()
 
     direcciones = [
         (-1, -1), (-1, 0), (-1, 1),
@@ -131,7 +128,7 @@ def objetos_en_area_vision(entidad_animal, ecosistema, aumento=1):
     visitados = set()
 
     queue = SimpleQueue()
-    queue.put_nowait((entidad_animal.posicion, 0))
+    queue.put_nowait((entidad_animal.posicion, 1))
     visitados.add(entidad_animal.posicion)
 
     while not queue.empty():
@@ -143,6 +140,6 @@ def objetos_en_area_vision(entidad_animal, ecosistema, aumento=1):
                     nueva_posicion not in visitados and ecosistema.es_posicion_valida(nueva_posicion)):
                 visitados.add(nueva_posicion)
                 queue.put_nowait((nueva_posicion, distancia + 1))
-                objetos.extend(ecosistema.entidades_en_posicion(nueva_posicion))
+                objetos.union(ecosistema.entidades_en_posicion(nueva_posicion))
 
     return objetos

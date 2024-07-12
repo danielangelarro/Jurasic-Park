@@ -20,29 +20,23 @@ mapa = cargar_mapa()
 ecosistema = Ecosistema(mapa)
 simulacion = Simulacion(ecosistema)
 
-# Crear y agregar animales y vegetación
-tiranosaurio = Tiranosaurio()
-secuoya = Secuoya()
-helecho = Helecho()
-baya = Baya()
+# for _ in range(5):
+#     ecosistema.agregar_animal(Braquiosaurio(sexo=random.choice(["Macho", "Hembra"])))
+#
+# for _ in range(7):
+#     ecosistema.agregar_animal(Triceratops(sexo=random.choice(["Macho", "Hembra"])))
 
-for _ in range(5):
-    ecosistema.agregar_animal(Braquiosaurio(sexo=random.choice(["Macho", "Hembra"])))
+# for _ in range(7):
+#     ecosistema.agregar_animal(Tiranosaurio(sexo=random.choice(["Macho", "Hembra"])))
 
-for _ in range(7):
-    ecosistema.agregar_animal(Triceratops(sexo=random.choice(["Macho", "Hembra"])))
-
-for _ in range(7):
-    ecosistema.agregar_animal(Tiranosaurio(sexo=random.choice(["Macho", "Hembra"])))
-
-for _ in range(3):
-    ecosistema.agregar_vegetacion(secuoya)
-
-for _ in range(5):
-    ecosistema.agregar_vegetacion(helecho)
-
-for _ in range(5):
-    ecosistema.agregar_vegetacion(baya)
+# for _ in range(3):
+#     ecosistema.agregar_vegetacion(secuoya)
+#
+# for _ in range(5):
+#     ecosistema.agregar_vegetacion(helecho)
+#
+# for _ in range(5):
+#     ecosistema.agregar_vegetacion(baya)
 
 #
 # for i in range(5):
@@ -69,4 +63,4 @@ simulacion.realizar_experimento("Supervivencia", simulacion.experimento_superviv
 # simulacion.imprimir_historial_eventos()
 
 # Graficar historial de la simulación
-simulacion.graficar_historial()
+# simulacion.graficar_historial()

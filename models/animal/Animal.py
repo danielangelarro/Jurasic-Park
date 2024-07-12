@@ -14,8 +14,10 @@ class Animal(ABC):
         self.min_peso = peso / 2
         self.alcance_vision = alcance_vision
         self.alcance_accion = alcance_accion
-        self.objetos_en_area_vision = []
-        self.objetos_en_area_accion = []
+        self.objetos_en_area_vision = set()
+        self.objetos_en_area_accion = set()
+        self.posicion_en_area_accion = set()
+        self.terreno_en_area_accion = set()
         self._ataque = ataque
         self._defensa = defensa
         self.habitat = habitat
@@ -32,6 +34,7 @@ class Animal(ABC):
         self.is_alive = True
         self.crias = []
         self.informacion_manada = set()
+        self.sobrevivir = 0
 
     def __str__(self):
         return (f'{self.especie} [{self.tipo}] \n'

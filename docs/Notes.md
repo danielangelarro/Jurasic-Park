@@ -514,28 +514,19 @@ Implementar esta integración permite personalizar profundamente las decisiones 
 
 ```chatinput
 Genera un árbol de decisión en formato JSON para un humano con la siguiente personalidad: [PERSONALIDAD]. Las acciones disponibles son: 
-cazar, recolectar, pescar, descansar, construir, buscar_refugio, huir, comunicar, aparearse,
-acercarse, gritar, moverse, beber, atacar. El árbol de decisión debe considerar las características genéticas 
+cazar, recolectar, pescar, descansar, construir, buscar_refugio, huir, comunicar, aparearse_humano,
+acercarse, gritar, moverse_humano, beber, atacar_humano. El árbol de decisión debe considerar las características genéticas 
 (genetica.Fuerza, genetica.Velocidad, genetica.Resistencia, genetica.Inteligencia, genetica.Adaptabilidad), las habilidades 
 (habilidades.Caza, habilidades.Recoleccion, habilidades.Pesca, habilidades.Exploracion) y los estados 
 fisiológicos (is_alive, is_hambriento, is_sediento, cansancio) del humano. Las zonas son (sabana, desierto, pantano, praderaa, agua, acantilado). 
 Define alternativas en caso de que la tarea no pueda cumplirse de tal manera que se intenten realizar todas.
 No coloques el campo para la decision si la condition es falsa y no generes condiciones anidadas. 
 genera el arbol de decision para cada una de las zonas.
-Genera solamente el JSON, no menciones palabras de más. Utiliza el sistema de condicionales de python.
-
-Ten en cuenta la siguiente restriccion de las acciones que se pueden realizar en dependencia de la zona en la que se encuentra:
-"sabana": ["cazar", "recolectar", "descansar", "construir", "buscar_refugio", "huir", "comunicar", "aparearse", "acercarse", "gritar", "moverse", "atacar"],
-"desierto": ["cazar", descansar", "buscar_refugio", "huir", "comunicar", "aparearse", "acercarse", "gritar", "moverse"],
-"pradera": ["cazar", "recolectar", "descansar", "construir", "buscar_refugio", "huir", "comunicar", "aparearse", "acercarse", "gritar", "moverse", "atacar"],
-"agua": ["pescar", "huir", "comunicar", "acercarse", "gritar", "moverse", "beber"],
-"acantilado": ["descansar", "buscar_refugio", "huir", "comunicar", "aparearse", "acercarse", "gritar", "moverse", "atacar"],
-"pantano": ["cazar", "recolectar", "pescar", "descansar", "buscar_refugio", "huir", "comunicar", "aparearse", "acercarse", "gritar", "moverse", "beber", "atacar"]
-
+Genera solamente el JSON, no menciones palabras de más. Utiliza el sistema de condicionales de python. La prioridad numero 1 de todo humano
+es sobrevivir.
 
 ## Example
 {
-  "sabana": {
     "acciones": [
       {
         "condition": "not is_alive",
@@ -571,218 +562,17 @@ Ten en cuenta la siguiente restriccion de las acciones que se pueden realizar en
       },
       {
         "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
+        "true": "aparearse_humano"
       },
       {
         "condition": "genetica.Fuerza > 60",
-        "true": "atacar"
+        "true": "atacar_humano"
       },
       {
         "condition": "True",
         "true": "acercarse"
       }
     ]
-  },
-  "desierto": {
-    "acciones": [
-      {
-        "condition": "not is_alive",
-        "true": "return"
-      },
-      {
-        "condition": "is_hambriento and habilidades.Caza > 50",
-        "true": "cazar"
-      },
-      {
-        "condition": "cansancio > 70",
-        "true": "descansar"
-      },
-      {
-        "condition": "genetica.Adaptabilidad < 30",
-        "true": "buscar_refugio"
-      },
-      {
-        "condition": "genetica.Velocidad > 70",
-        "true": "huir"
-      },
-      {
-        "condition": "genetica.Inteligencia > 50",
-        "true": "comunicar"
-      },
-      {
-        "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
-      },
-      {
-        "condition": "True",
-        "true": "acercarse"
-      }
-    ]
-  },
-  "pradera": {
-    "acciones": [
-      {
-        "condition": "not is_alive",
-        "true": "return"
-      },
-      {
-        "condition": "is_hambriento and habilidades.Caza > 50",
-        "true": "cazar"
-      },
-      {
-        "condition": "is_hambriento and habilidades.Recoleccion > 40",
-        "true": "recolectar"
-      },
-      {
-        "condition": "cansancio > 70",
-        "true": "descansar"
-      },
-      {
-        "condition": "genetica.Inteligencia > 60 and habilidades.Exploracion > 50",
-        "true": "construir"
-      },
-      {
-        "condition": "genetica.Adaptabilidad < 30",
-        "true": "buscar_refugio"
-      },
-      {
-        "condition": "genetica.Velocidad > 70",
-        "true": "huir"
-      },
-      {
-        "condition": "genetica.Inteligencia > 50",
-        "true": "comunicar"
-      },
-      {
-        "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
-      },
-      {
-        "condition": "genetica.Fuerza > 60",
-        "true": "atacar"
-      },
-      {
-        "condition": "True",
-        "true": "acercarse"
-      }
-    ]
-  },
-  "agua": {
-    "acciones": [
-      {
-        "condition": "not is_alive",
-        "true": "return"
-      },
-      {
-        "condition": "is_hambriento and habilidades.Pesca > 30",
-        "true": "pescar"
-      },
-      {
-        "condition": "is_sediento",
-        "true": "beber"
-      },
-      {
-        "condition": "genetica.Velocidad > 70",
-        "true": "huir"
-      },
-      {
-        "condition": "genetica.Inteligencia > 50",
-        "true": "comunicar"
-      },
-      {
-        "condition": "True",
-        "true": "acercarse"
-      }
-    ]
-  },
-  "acantilado": {
-    "acciones": [
-      {
-        "condition": "not is_alive",
-        "true": "return"
-      },
-      {
-        "condition": "cansancio > 70",
-        "true": "descansar"
-      },
-      {
-        "condition": "genetica.Adaptabilidad < 30",
-        "true": "buscar_refugio"
-      },
-      {
-        "condition": "genetica.Velocidad > 70",
-        "true": "huir"
-      },
-      {
-        "condition": "genetica.Inteligencia > 50",
-        "true": "comunicar"
-      },
-      {
-        "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
-      },
-      {
-        "condition": "genetica.Fuerza > 60",
-        "true": "atacar"
-      },
-      {
-        "condition": "True",
-        "true": "acercarse"
-      }
-    ]
-  },
-  "pantano": {
-    "acciones": [
-      {
-        "condition": "not is_alive",
-        "true": "return"
-      },
-      {
-        "condition": "is_hambriento and habilidades.Caza > 50",
-        "true": "cazar"
-      },
-      {
-        "condition": "is_hambriento and habilidades.Recoleccion > 40",
-        "true": "recolectar"
-      },
-      {
-        "condition": "is_hambriento and habilidades.Pesca > 30",
-        "true": "pescar"
-      },
-      {
-        "condition": "is_sediento",
-        "true": "beber"
-      },
-      {
-        "condition": "cansancio > 70",
-        "true": "descansar"
-      },
-      {
-        "condition": "genetica.Adaptabilidad < 30",
-        "true": "buscar_refugio"
-      },
-      {
-        "condition": "genetica.Velocidad > 70",
-        "true": "huir"
-      },
-      {
-        "condition": "genetica.Inteligencia > 50",
-        "true": "comunicar"
-      },
-      {
-        "condition": "genetica.Resistencia > 50",
-        "true": "aparearse"
-      },
-      {
-        "condition": "genetica.Fuerza > 60",
-        "true": "atacar"
-      },
-      {
-        "condition": "True",
-        "true": "acercarse"
-      }
-    ]
-  }
 }
 ```
 
