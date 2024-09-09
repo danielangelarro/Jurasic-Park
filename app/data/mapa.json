@@ -1,0 +1,25 @@
+{
+  "tamanio": 20,
+  "terreno": [
+    ["sabana", "sabana", "pradera", "pradera", "pradera", "desierto", "desierto", "desierto", "desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua"],
+    ["sabana", "sabana", "pradera", "pradera", "pradera", "desierto", "desierto", "desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua"],
+    ["sabana", "pradera", "pradera", "pradera", "pradera", "desierto", "desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano"],
+    ["pradera", "pradera", "pradera", "pradera", "desierto", "desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano"],
+    ["pradera", "pradera", "pradera", "desierto", "desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano"],
+    ["pradera", "pradera", "desierto", "desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado"],
+    ["pradera", "desierto", "desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado"],
+    ["desierto", "desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado"],
+    ["desierto", "desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado"],
+    ["desierto", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado"],
+    ["sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana"],
+    ["sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana"],
+    ["sabana", "pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana", "sabana"],
+    ["pradera", "pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana", "sabana", "pradera"],
+    ["pradera", "pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana", "sabana", "pradera", "pradera"],
+    ["pradera", "pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera"],
+    ["pradera", "agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera"],
+    ["agua", "agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "desierto"],
+    ["agua", "agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "desierto", "desierto"],
+    ["agua", "agua", "pantano", "pantano", "pantano", "acantilado", "acantilado", "acantilado", "acantilado", "acantilado", "sabana", "sabana", "sabana", "pradera", "pradera", "pradera", "pradera", "desierto", "desierto", "desierto"]
+  ]
+}
