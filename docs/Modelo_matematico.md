@@ -28,13 +28,13 @@ El modelo de ataque se calcula en función de varios factores:
 - **Base de ataque**: Una combinación ponderada de fuerza (40%), velocidad (30%) e inteligencia (20%).
   
   \[
-  \text{Base de ataque} = 0.4 \times \text{Fuerza} + 0.3 \times \text{Velocidad} + 0.2 \times \text{Inteligencia}
+  $\text{Base de ataque} = 0.4 \times \text{Fuerza} + 0.3 \times \text{Velocidad} + 0.2 \times \text{Inteligencia}$
   \]
 
 - **Penalización por baja resistencia**: Si la resistencia es menor a 30, se aplica una penalización del 20%.
   
   \[
-  \text{Base de ataque} \times 0.8
+  $\text{Base de ataque} \times 0.8$
   \]
 
 - Factores adicionales que modifican el ataque:
@@ -48,7 +48,7 @@ El modelo de ataque se calcula en función de varios factores:
 El ataque final se obtiene multiplicando la base de ataque por todos los factores:
 
 \[
-\text{Ataque} = \text{Base de ataque} \times \text{Factor salud} \times \text{Factor hambre} \times \text{Factor sed} \times \text{Factor cansancio} \times \text{Factor temperatura} \times \text{Factor edad}
+$\text{Ataque} = \text{Base de ataque} \times \text{Factor salud} \times \text{Factor hambre} \times \text{Factor sed} \times \text{Factor cansancio} \times \text{Factor temperatura} \times \text{Factor edad}$
 \]
 
 ### 3. **Cálculo de Defensa**
@@ -56,7 +56,7 @@ La defensa de cada humano se calcula de manera similar al ataque, utilizando dif
 - **Base de defensa**: Combinación ponderada de resistencia (40%), adaptabilidad (30%) y supervivencia (20%).
 
   \[
-  \text{Base de defensa} = 0.4 \times \text{Resistencia} + 0.3 \times \text{Adaptabilidad} + 0.2 \times \text{Supervivencia}
+  $\text{Base de defensa} = 0.4 \times \text{Resistencia} + 0.3 \times \text{Adaptabilidad} + 0.2 \times \text{Supervivencia}$
   \]
 
 - Los factores adicionales que modifican la defensa son idénticos a los del ataque: salud, hambre, sed, cansancio, temperatura corporal y edad.
@@ -64,7 +64,7 @@ La defensa de cada humano se calcula de manera similar al ataque, utilizando dif
 El cálculo final es:
 
 \[
-\text{Defensa} = \text{Base de defensa} \times \text{Factor salud} \times \text{Factor hambre} \times \text{Factor sed} \times \text{Factor cansancio} \times \text{Factor temperatura} \times \text{Factor edad}
+$\text{Defensa} = \text{Base de defensa} \times \text{Factor salud} \times \text{Factor hambre} \times \text{Factor sed} \times \text{Factor cansancio} \times \text{Factor temperatura} \times \text{Factor edad}$
 \]
 
 ### 4. **Actualización de Estados Fisiológicos**
@@ -72,19 +72,19 @@ Los humanos experimentan cambios fisiológicos en cada ciclo de la simulación:
 - **Hambre**: Aumenta de acuerdo a una función logarítmica del tiempo, con una tasa de incremento de 0.1.
   
   \[
-  \text{Hambre} = \min(0.1 \times \log(t + 1) + \text{Hambre anterior}, 100)
+  $\text{Hambre} = \min(0.1 \times \log(t + 1) + \text{Hambre anterior}, 100)$
   \]
 
 - **Sed**: Aumenta con una tasa logarítmica de 0.2.
   
   \[
-  \text{Sed} = \min(0.2 \times \log(t + 1) + \text{Sed anterior}, 100)
+  $\text{Sed} = \min(0.2 \times \log(t + 1) + \text{Sed anterior}, 100)$
   \]
 
 - **Cansancio**: Aumenta en función de la resistencia genética y el tiempo.
   
   \[
-  \text{Cansancio} = \min(0.15 \times \log(t + 1) \times \left(1 - \frac{\text{Resistencia}}{100}\right) + \text{Cansancio anterior}, 100)
+  $\text{Cansancio} = \min(0.15 \times \log(t + 1) \times \left(1 - \frac{\text{Resistencia}}{100}\right) + \text{Cansancio anterior}, 100)$
   \]
 
 Si la resistencia genética de un humano es alta, se aplica un factor de mejora en el hambre, la sed y el cansancio.
@@ -110,7 +110,7 @@ El proceso de reproducción considera varios factores:
 - **Probabilidad de selección**: Basada en la salud, la edad (más alta entre 18 y 35 años), y el tiempo desde la última reproducción.
   
   \[
-  P(\text{reproducción}) = 0.1 + \frac{\text{Salud}}{100} + \text{EdadMod} + \text{ParejaMod}
+  $P(\text{reproducción}) = 0.1 + \frac{\text{Salud}}{100} + \text{EdadMod} + \text{ParejaMod}$
   \]
 
 - **Probabilidad de éxito**: Depende de la supervivencia genética.
@@ -119,13 +119,13 @@ El proceso de reproducción considera varios factores:
 - **Probabilidad de selección**: Proporcional al estado fisiológico.
 
   \[
-  P(\text{selección}) = \frac{\text{estado}}{100}
+  $P(\text{selección}) = \frac{\text{estado}}{100}$
   \]
 
 - **Probabilidad de éxito**: Una combinación de un valor base (0.5 o 0.3 según el contexto) más un modificador que depende del terreno o la genética.
 
   \[
-  P(\text{éxito}) = \text{base} + \text{modificador}
+  $P(\text{éxito}) = \text{base} + \text{modificador}$
   \]
 
 ## Modelos utilizados en ***app/models/entorno.py***
