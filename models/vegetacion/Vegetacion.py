@@ -1,21 +1,19 @@
 import random
+
+from models.Entidad import Entidad
 from models.utils.Types_Enum import Tipo_Entidad, Tipo_Terreno
 
 
-class Vegetacion:
+class Vegetacion(Entidad):
     def __init__(self, especie, frutal, peso, max_peso, edad, edad_adulta, alcance, habitat):
-        self.especie = especie
+        super().__init__(especie, peso, edad, habitat)
+
         self.frutal = frutal
         self.tipo = Tipo_Entidad.VEGETAL
-        self.peso = peso
         self.min_peso = max_peso * 0.2
         self.max_peso = max_peso
-        self.edad = edad
         self.edad_adulta = edad_adulta
         self.alcance = alcance
-        self.posicion = (0, 0)
-        self.habitat = habitat
-        self.is_alive = True
 
     @property
     def adulto(self):

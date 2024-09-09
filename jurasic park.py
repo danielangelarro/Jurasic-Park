@@ -1,13 +1,5 @@
 import random
 
-from models.dinosaurio.Braquiosaurio import Braquiosaurio
-from models.dinosaurio.Triceratops import Triceratops
-from models.dinosaurio.Tiranosaurio import Tiranosaurio
-from models.vegetacion.Secuoya import Secuoya
-from models.vegetacion.Helecho import Helecho
-from models.vegetacion.Baya import Baya
-from models.humano.Humano import Humano
-
 from app.Ecosistema import Ecosistema
 from app.Simulacion import Simulacion
 from app.utils_map import cargar_mapa

@@ -1,15 +1,22 @@
 from abc import ABC, abstractmethod
 
+from models.Entidad import Entidad
 
-class Animal(ABC):
+
+class Animal(Entidad):
     def __init__(self, especie, tipo, convivencia, peso, alcance_vision,
                  alcance_accion, ataque, defensa, habitat, sexo,
                  max_edad, time_gestacion, edad_adulta, huevo=False
                  ):
-        self.especie = especie
+        super().__init__(
+            especie=especie,
+            peso=peso / 4 if huevo else peso,
+            edad=-time_gestacion if huevo else max_edad // 2,
+            habitat=habitat
+        )
+
         self.tipo = tipo
         self.convivencia = convivencia
-        self.peso = peso / 4 if huevo else peso
         self.max_peso = peso
         self.min_peso = peso / 2
         self.alcance_vision = alcance_vision
@@ -20,18 +27,13 @@ class Animal(ABC):
         self.terreno_en_area_accion = set()
         self._ataque = ataque
         self._defensa = defensa
-        self.habitat = habitat
         self.sed = 0
         self.cansancio = 0
-        self.posicion = (0, 0)
         self.sexo = sexo
-        self.edad = -time_gestacion if huevo else max_edad // 2
         self.edad_adulta = edad_adulta
         self.max_edad = max_edad
-        # self.ciclo_gestacion = -time_gestacion if huevo else 0
         self.time_gestacion = time_gestacion
         self.custodiando_huevo = False
-        self.is_alive = True
         self.crias = []
         self.informacion_manada = set()
         self.sobrevivir = 0

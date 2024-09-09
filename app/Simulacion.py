@@ -22,6 +22,7 @@ class Simulacion:
         self.humanos_por_area = {area: 0 for area in ["sabana", "desierto", "pradera", "agua", "acantilado", "pantano"]}
         self.experimentos = []
         self.historial = []
+        self.historial_dias = []
 
     def agregar_humano(self, humano):
         self.ecosistema.agregar_animal(humano)
@@ -159,10 +160,10 @@ class Simulacion:
 
     def graficar_historial(self):
 
-        dias = self.ecosistema.days
-
         fig, ax = plt.subplots()
-        ax.plot(range(len(dias)), dias)
+
+        for hd in self.historial_dias:
+            ax.plot(range(len(self.historial_dias)), self.historial_dias)
 
         ax.set_title('Cantidad de humanos por día')
         ax.set_xlabel('Día')
@@ -206,18 +207,19 @@ class Simulacion:
 
         for generacion in range(num_generaciones):
             self.reset_simulacion()
+            historial_dias = [10]
 
             for _ in range(dias_simulacion):
                 reportes = self.ecosistema.ciclo()
+
+                historial_dias.append(len(self.ecosistema.humanos))
 
                 if not len(self.ecosistema.humanos):
                     break
 
                 print(f"Cantidad de eventos: {len(reportes)}")
 
-                # for evento in reportes:
-                #     if not isinstance(evento["entidad"], Humano):
-                #         continue
+            self.historial_dias.append(historial_dias)
 
             print(f"Generación {generacion + 1}:"
                   f"Evaluación: {self.evaluar_simulacion(self.ecosistema.days)} pts\n"
@@ -225,3 +227,8 @@ class Simulacion:
                   f"Sobrevivientes: {len(self.ecosistema.humanos)}/{self.total_humanos}\n")
 
             self.ecosistema.evolucionar()
+
+        print(self.historial_dias)
+
+        self.graficar_historial()
+        self.historial_dias = []
