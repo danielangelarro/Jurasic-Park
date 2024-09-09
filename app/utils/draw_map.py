@@ -2,9 +2,6 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 
-def cargar_mapa(archivo='mapa.json'):
-    with open(archivo, 'r') as file:
-        return json.load(file)
 
 def dibujar_mapa(mapa):
     terreno = mapa['terreno']
@@ -53,7 +50,3 @@ def dibujar_mapa(mapa):
     # Ajustar el diseño y mostrar
     plt.tight_layout()
     plt.show()
-
-# Cargar y dibujar el mapa
-mapa = cargar_mapa()
-dibujar_mapa(mapa)
