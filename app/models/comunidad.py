@@ -129,13 +129,13 @@ class Comunidad:
         self.sed[resultado] = 0
         return resultado
 
-    def cazar(self, entorno):
+    def buscar_comida(self, entorno):
         seleccion = np.random.rand(self.n_humanos) < self.probabilidad_seleccion(self.hambre)
         éxito = np.zeros(self.n_humanos, dtype=bool)
 
         for i in range(self.n_humanos):
             tipo_terreno = entorno.terreno[self.posiciones[i][0], self.posiciones[i][1]]
-            terreno_mod = entorno.probabilidad_cazar(tipo_terreno)
+            terreno_mod = entorno.probabilidad_buscar_comida(tipo_terreno)
             éxito[i] = np.random.rand() < self.probabilidad_éxito(0.5, terreno_mod)
 
         resultado = seleccion & éxito
@@ -155,6 +155,12 @@ class Comunidad:
             self.posiciones[i] = nueva_posicion
 
         return self.posiciones
+
+    def descansar(self):
+        seleccion = np.random.rand(self.n_humanos) < self.cansancio / 100
+        exito = np.random.rand(self.n_humanos) < 0.5
+        self.cansancio[exito] = 0
+        return exito
 
     def probabilidad_seleccion(self, estado):
         return estado / 100

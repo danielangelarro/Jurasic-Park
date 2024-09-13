@@ -52,7 +52,7 @@ class Entorno:
 
         return probabilidad
 
-    def probabilidad_cazar(self, tipo_terreno):
+    def probabilidad_buscar_comida(self, tipo_terreno):
         # Diccionario de probabilidades basadas en el tipo de terreno
         probabilidad_terreno = {
             'sabana': 0.5,
