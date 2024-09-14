@@ -11,12 +11,12 @@ class Comunidad:
         self.cansancio = np.zeros(n_humanos)
         self.salud = np.ones(n_humanos) * 100
         self.temperatura_corporal = np.zeros(n_humanos)
-        self.genotipo_fuerza = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_velocidad = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_resistencia = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_inteligencia = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_adaptabilidad = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_supervivencia = np.random.normal(loc=50, scale=10, size=n_humanos)
+        self.genotipo_fuerza = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_velocidad = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_resistencia = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_inteligencia = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_adaptabilidad = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_supervivencia = np.random.normal(loc=50, scale=30, size=n_humanos)
         self.edad = np.random.randint(18, 60, size=n_humanos)
         self.edad_inicial = self.edad.copy()
         self.genero = np.random.choice(['masculino', 'femenino'], size=n_humanos)
@@ -145,8 +145,10 @@ class Comunidad:
     def desplazarse(self):
         for i in range(self.n_humanos):
             factor_velocidad = self.genotipo_velocidad[i] / 100
+            factor_cansancio = (100 - self.cansancio[i]) / 100 
+            factor_final = factor_velocidad * factor_cansancio 
 
-            movimiento = np.random.randint(-1, 2, size=2) * int(factor_velocidad * 3)  # Multiplicador de velocidad
+            movimiento = np.random.randint(-1, 2, size=2) * int(factor_final * 3)  # Multiplicador de velocidad
 
             nueva_posicion = self.posiciones[i] + movimiento
             nueva_posicion = np.clip(nueva_posicion, 0, self.tamano - 1)  # Limitar al tamano del entorno
@@ -180,7 +182,7 @@ class Comunidad:
         hijos = []
 
         for i in range(self.n_humanos):
-            if self.genero[i] == 'femenino' and self.edad[i] >= 18:
+            if self.genero[i] == 'femenino' and 15 <= self.edad[i] <= 50:
                 seleccion = np.random.rand() < self.probabilidad_seleccion_reproducirse(self.salud[i], self.edad[i],
                                                                                         self.ultima_reproduccion[i])
                 éxito = np.random.rand() < self.probabilidad_éxito(0.3, self.genotipo_supervivencia[i])
@@ -256,6 +258,9 @@ class Comunidad:
     def mortalidad(self):
         prob_muerte = np.exp(0.01 * (self.hambre + self.sed + self.cansancio - 200))
         muerte = np.random.rand(self.n_humanos) < prob_muerte
+        edad_muerte = self.edad >= np.random.normal(loc=75, scale=15, size=self.n_humanos)
+        
+        muerte |= edad_muerte
 
         return self.remove_humano(muerte)
 

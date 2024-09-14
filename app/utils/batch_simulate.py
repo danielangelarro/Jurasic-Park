@@ -13,7 +13,7 @@ def batch_simulate(
 ):
     batch_poblacion = []
 
-    for _ in range(n_simulations):
+    for _ in range(n_simulations):        
         simulacion = Simulacion(
             tamano_entorno=tamano_entorno,
             n_humanos=n_humanos,

@@ -14,15 +14,6 @@ class CombinacionGenetica:
             dinosaurios = [],
             entorno = None,
     ):
-        if genotipo is None:
-            genotipo = {
-                "fuerza": int(np.random.uniform(10, 90)),
-                "velocidad": int(np.random.uniform(10, 90)),
-                "resistencia": int(np.random.uniform(10, 90)),
-                "inteligencia": int(np.random.uniform(10, 90)),
-                "adaptabilidad": int(np.random.uniform(10, 90)),
-                "supervivencia": int(np.random.uniform(10, 90))
-            }
 
         self.simulacion = Simulacion(
             tamano_entorno=tamano_entorno,

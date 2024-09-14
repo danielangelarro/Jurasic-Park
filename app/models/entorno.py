@@ -90,5 +90,6 @@ class Entorno:
                 cantidad = np.random.randint(2) if dino.convivencia == ConvivenciaType.SOLITARIO else np.random.randint(
                     4)
                 dinosaurios_en_terreno[posicion]['ataque'] += cantidad * dino.ataque
+                dinosaurios_en_terreno[posicion]['defensa'] += cantidad * dino.defensa
 
         return dinosaurios_en_terreno

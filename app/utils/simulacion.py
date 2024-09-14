@@ -29,7 +29,12 @@ class Simulacion:
         self.sistema_experto = SistemaExperto(comunidad=self.comunidad, entorno=self.entorno)
 
     def ejecutar(self):
-        resultados = {'ciclo': [], 'poblacion': [], 'clima': [], 'muerte_dinosaurios': []}
+        resultados = {
+            'ciclo': [0], 
+            'poblacion': [self.comunidad.n_humanos], 
+            'clima': [self.entorno.clima], 
+            'muerte_dinosaurios': [None]
+        }
 
         for ciclo in range(self.n_ciclos):
             self.entorno.cambiar_clima()
@@ -41,10 +46,6 @@ class Simulacion:
             dinosaurios_posicion = self.entorno.generate_dinosaurios(posiciones=self.comunidad.posiciones)
             dinosaurios_resultado = self.comunidad.interaccion_dinosaurio(dinoasurios_por_posicion=dinosaurios_posicion)
 
-            # agua_resultado = self.comunidad.buscar_agua(self.entorno)
-            # caza_resultado = self.comunidad.buscar_comida(self.entorno)
-            # nacimientos = self.comunidad.reproducirse() if self.reproduccion else 0
-
             self.sistema_experto.reset()
             self.sistema_experto.declare(EstadoComunidad(sed=np.mean(self.comunidad.sed)))
             self.sistema_experto.declare(EstadoComunidad(hambre=np.mean(self.comunidad.hambre)))
@@ -52,7 +53,7 @@ class Simulacion:
             self.sistema_experto.declare(EstadoComunidad(permitir_reproduccion=self.reproduccion))
             self.sistema_experto.run()
 
-            resultados['ciclo'].append(ciclo)
+            resultados['ciclo'].append(ciclo + 1)
             resultados['poblacion'].append(self.comunidad.n_humanos)
             resultados['clima'].append(self.entorno.clima)
             resultados['muerte_dinosaurios'].append(dinosaurios_resultado)
