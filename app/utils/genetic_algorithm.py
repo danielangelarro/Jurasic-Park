@@ -103,7 +103,7 @@ class GeneticAlgorithm:
         for key in genotipo.keys():
             if np.random.rand() < tasa_mutacion:
                 genotipo[key] += np.random.randint(-5, 5)
-                genotipo[key] = max(0, min(100, genotipo[key]))
+                genotipo[key] = max(10, min(100, genotipo[key]))
 
         return genotipo
 

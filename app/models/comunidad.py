@@ -22,6 +22,12 @@ class Comunidad:
         self.genero = np.random.choice(['masculino', 'femenino'], size=n_humanos)
         self.ultima_reproduccion = np.full(n_humanos, -3)  # Iniciar todas como nunca se han reproducido
         self.posiciones = np.random.randint(0, tamano_entorno, (n_humanos, 2))  # Posicion aleatoria en el entorno
+        
+        self.edad_final = []
+        self.supervivencia_final = []
+        self.salud_final = []
+        self.supervivencia_max = 0
+        self.poblacion_total = n_humanos
 
         self.aplicar_interacciones_genotipicas()
 
@@ -29,22 +35,22 @@ class Comunidad:
         # Condiciones aplicadas a nivel de comunidad usando operaciones vectorizadas
 
         # Aumento de inteligencia disminuye la fuerza
-        self.genotipo_fuerza[self.genotipo_inteligencia > 0.7] *= 0.9
+        self.genotipo_fuerza[self.genotipo_inteligencia > 70] *= 0.9
 
         # Aumentar resistencia reduce la fuerza
-        self.genotipo_fuerza[self.genotipo_resistencia > 0.7] *= 0.85
+        self.genotipo_fuerza[self.genotipo_resistencia > 70] *= 0.85
 
         # Aumentar fuerza reduce la velocidad
-        self.genotipo_velocidad[self.genotipo_fuerza > 0.7] *= 0.85
+        self.genotipo_velocidad[self.genotipo_fuerza > 70] *= 0.85
 
         # Aumentar velocidad reduce la resistencia
-        self.genotipo_resistencia[self.genotipo_velocidad > 0.7] *= 0.9
+        self.genotipo_resistencia[self.genotipo_velocidad > 70] *= 0.9
 
         # Aumentar inteligencia mejora la eficiencia y aumenta resistencia
-        self.genotipo_resistencia[self.genotipo_inteligencia > 0.7] *= 1.1
+        self.genotipo_resistencia[self.genotipo_inteligencia > 70] *= 1.1
 
         # Alta fuerza y resistencia reduce la inteligencia
-        condicion_fuerza_resistencia = (self.genotipo_fuerza > 0.6) & (self.genotipo_resistencia > 0.6)
+        condicion_fuerza_resistencia = (self.genotipo_fuerza > 60) & (self.genotipo_resistencia > 60)
         self.genotipo_inteligencia[condicion_fuerza_resistencia] *= 0.85
 
     def calcular_ataque(self, indice):
@@ -85,13 +91,15 @@ class Comunidad:
     def actualizar_estados_fisiologicos(self):
         for i in range(self.n_humanos):
             tiempo = self.edad[i] - self.edad_inicial[i]
+            self.supervivencia_max = max(self.supervivencia_max, tiempo)
             self.hambre[i] = min(max(0.1 * np.log(tiempo + 1) + self.hambre[i], 0), 100)
             self.sed[i] = min(max(0.2 * np.log(tiempo + 1) + self.sed[i], 0), 100)
             self.cansancio[i] = min(
                 max(0.15 * np.log(tiempo + 1) * (1 - self.genotipo_resistencia[i] / 100) + self.cansancio[i], 0), 100)
+            self.salud = (300 - self.hambre + self.sed + self.cansancio) / 3
             self.edad[i] += 1
 
-            if self.genotipo_resistencia[i] > 0.7:
+            if self.genotipo_resistencia[i] > 70:
                 self.hambre[i] *= 0.8  # Mejora la resistencia al hambre
                 self.sed[i] *= 0.85  # Mejora la resistencia a la sed
                 self.cansancio[i] *= 0.75  # Mejora la resistencia al cansancio
@@ -190,6 +198,7 @@ class Comunidad:
                     hijos += self.crear_hijos()
 
         self.n_humanos += len(hijos)
+        self.poblacion_total += len(hijos)
         self.ultima_reproduccion[self.ultima_reproduccion >= 0] += 1
 
         if hijos:
@@ -221,12 +230,19 @@ class Comunidad:
         genotipo_adaptabilidad = self.genotipo_adaptabilidad[padre] if np.random.rand() > 0.5 else self.genotipo_adaptabilidad[madre]
         genotipo_supervivencia = self.genotipo_supervivencia[padre] if np.random.rand() > 0.5 else self.genotipo_supervivencia[madre]
 
-        genotipo_fuerza += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_velocidad += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_resistencia += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_inteligencia += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_adaptabilidad += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_supervivencia += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
+        genotipo_fuerza += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_velocidad += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_resistencia += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_inteligencia += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_adaptabilidad += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_supervivencia += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        
+        genotipo_fuerza = max(5, min(100, genotipo_fuerza))
+        genotipo_velocidad = max(5, min(100, genotipo_velocidad))
+        genotipo_resistencia = max(5, min(100, genotipo_resistencia))
+        genotipo_inteligencia = max(5, min(100, genotipo_inteligencia))
+        genotipo_adaptabilidad = max(5, min(100, genotipo_adaptabilidad))
+        genotipo_supervivencia = max(5, min(100, genotipo_supervivencia))
 
         edad = 0
         salud = 100
@@ -261,6 +277,13 @@ class Comunidad:
         edad_muerte = self.edad >= np.random.normal(loc=75, scale=15, size=self.n_humanos)
         
         muerte |= edad_muerte
+        
+        for i, m_i in enumerate(muerte):
+            if m_i:
+                tiempo = self.edad[i] - self.edad_inicial[i]
+                self.supervivencia_final.append(tiempo)
+                self.edad_final.append(self.edad[i])
+                self.salud_final.append(self.salud[i])
 
         return self.remove_humano(muerte)
 

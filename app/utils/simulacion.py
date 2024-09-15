@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 
 from app.models.comunidad import Comunidad
@@ -15,31 +16,58 @@ class Simulacion:
         reproduccion=True,
         dinosaurios=[],
         entorno=None,
+        save_results=False,
+        clima=None,
     ):
         self.entorno = entorno if entorno is not None else Entorno(tamano_entorno)
         self.comunidad = Comunidad(n_humanos, tamano_entorno)
         self.n_ciclos = n_ciclos
         self.reproduccion = reproduccion
         self.dinosaurios = dinosaurios
+        self.save_results = save_results
+        self.clima = clima
+
+        if clima is not None:
+            self.entorno.clima = clima
 
         for key in genotipo:
-            self.comunidad.__dict__[f'genotipo_{key}'] = np.full(10, genotipo[key])
+            self.comunidad.__dict__[f'genotipo_{key}'] = np.full(n_humanos, genotipo[key])
 
         # Inicializamos el sistema experto con la comunidad y el entorno
         self.sistema_experto = SistemaExperto(comunidad=self.comunidad, entorno=self.entorno)
 
     def ejecutar(self):
         resultados = {
-            'ciclo': [0], 
-            'poblacion': [self.comunidad.n_humanos], 
-            'clima': [self.entorno.clima], 
-            'muerte_dinosaurios': [None]
+            'duracion_supervivencia': 0,
+            'poblacion_inicial': self.comunidad.n_humanos,
+            'poblacion_total': 0, 
+            'supervivencia_max': 0, 
+            'edad_promedio': 0,
+            'salud_promedio': 0,
+            'clima': "", 
+            'terreno': "",
+            'genotipo_fuerza': np.mean(self.comunidad.genotipo_fuerza),
+            'genotipo_velocidad': np.mean(self.comunidad.genotipo_velocidad),
+            'genotipo_resistencia': np.mean(self.comunidad.genotipo_resistencia),
+            'genotipo_inteligencia': np.mean(self.comunidad.genotipo_inteligencia),
+            'genotipo_adaptabilidad': np.mean(self.comunidad.genotipo_adaptabilidad),
+            'genotipo_supervivencia': np.mean(self.comunidad.genotipo_supervivencia),
         }
+        
+        clima, terrenos = set(), set()
 
         for ciclo in range(self.n_ciclos):
-            self.entorno.cambiar_clima()
+            if self.clima is None:
+                self.entorno.cambiar_clima()
+            
             self.comunidad.actualizar_estados_fisiologicos()
             self.comunidad.mortalidad()
+
+            clima.add(self.entorno.clima)
+            
+            for i in range(self.comunidad.n_humanos):
+                tipo_terreno = self.entorno.terreno[self.comunidad.posiciones[i][0], self.comunidad.posiciones[i][1]]
+                terrenos.add(tipo_terreno)
 
             self.comunidad.desplazarse()
 
@@ -52,10 +80,18 @@ class Simulacion:
             self.sistema_experto.declare(EstadoComunidad(cansancio=np.mean(self.comunidad.cansancio)))
             self.sistema_experto.declare(EstadoComunidad(permitir_reproduccion=self.reproduccion))
             self.sistema_experto.run()
+            
+            if self.save_results and self.comunidad.n_humanos == 0:
+                break
+            
+            resultados['duracion_supervivencia'] = ciclo + 1
 
-            resultados['ciclo'].append(ciclo + 1)
-            resultados['poblacion'].append(self.comunidad.n_humanos)
-            resultados['clima'].append(self.entorno.clima)
-            resultados['muerte_dinosaurios'].append(dinosaurios_resultado)
-
+        # Recolectar datos para cada ciclo
+        resultados['poblacion_total'] = self.comunidad.poblacion_total
+        resultados['supervivencia_max'] = self.comunidad.supervivencia_max
+        resultados['edad_promedio'] = np.mean(np.concatenate((self.comunidad.edad_final, self.comunidad.edad)))
+        resultados['salud_promedio'] = np.mean(np.concatenate((self.comunidad.salud_final, self.comunidad.salud)))
+        resultados['clima'] = str(clima)
+        resultados['terreno'] = str(terrenos)
+        
         return resultados

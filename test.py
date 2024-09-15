@@ -2,6 +2,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
+from app.utils.simulacion import Simulacion
 from app.models.dinosaurios import *
 from app.models.entorno import Entorno
 from app.utils.draw_map import dibujar_mapa
@@ -13,64 +14,56 @@ with open('app/data/mapa.json', 'r') as file:
     mapa_data = json.load(file)
 
 
-def batch_simulate_genotipos(n_simulaciones, dinosaurios=[], reproduccion=True):
-    resultados_batch = []
 
-    # Diferentes configuraciones de genotipos para evaluar
-    genotipos_config = [
-        {'fuerza': 80, 'inteligencia': 50, 'resistencia': 60},  # Humanos fuertes
-        {'fuerza': 50, 'inteligencia': 90, 'resistencia': 70},  # Humanos inteligentes
-        {'fuerza': 70, 'inteligencia': 70, 'resistencia': 70},  # Humanos balanceados
-        {'fuerza': 30, 'inteligencia': 40, 'resistencia': 90},  # Humanos resistentes
-    ]
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-    entorno = Entorno(mapa_data['tamanio'], np.matrix(mapa_data['terreno']))
+# Cargar los datos desde el archivo CSV
+datos = pd.read_csv('resultados_simulacion.csv')
 
-    for genotipo in genotipos_config:
-        poblacion_final = []
+# Convertir los valores de genotipo y habilidades en columnas separadas
+# Aquí se asume que genotipo y habilidades están en formato de lista o JSON en el CSV
 
-        results = batch_simulate(
-            n_simulations=n_simulaciones,
-            genotipo=genotipo,
-            dinosaurios=dinosaurios,
-            reproduccion=reproduccion,
-            entorno=entorno
-        )
+# Ejemplo de transformación para genotipo
+genotipo_df = pd.json_normalize(datos['genotipo'].apply(pd.eval))
+habilidades_df = pd.json_normalize(datos['habilidades'].apply(pd.eval))
 
-        for i, result in enumerate(results):
-            poblacion_final.append(result['poblacion'][-1])  # Población al final de la simulación
+# Concatenar con los datos principales
+datos_completos = pd.concat([datos.drop(['genotipo', 'habilidades'], axis=1), genotipo_df, habilidades_df], axis=1)
 
-        # Guardar los resultados de cada configuración de genotipo
-        resultados_batch.append({
-            'genotipo': genotipo,
-            'poblacion': result['poblacion'],
-            'results': results,
-            'poblacion_final': np.mean(poblacion_final)
-        })
+# Análisis de hipótesis
 
-    return resultados_batch
+# 1. Evaluar la influencia de la genética y habilidades en la supervivencia
+sns.pairplot(datos_completos, vars=['supervivencia'] + list(genotipo_df.columns) + list(habilidades_df.columns))
+plt.title('Influencia de Genética y Habilidades en la Supervivencia')
+plt.show()
 
+# 2. Evaluar cómo la adaptabilidad mejora la supervivencia
+sns.lineplot(data=datos_completos, x='ciclo', y='supervivencia', hue='adaptabilidad')
+plt.title('Adaptabilidad vs Supervivencia a lo largo de los ciclos')
+plt.xlabel('Ciclo')
+plt.ylabel('Supervivencia')
+plt.show()
 
-def visualizar_resultados_batch(resultados_batch):
-    # Extraer la información para graficar
-    genotipos = ["Humanos fuertes", "Humanos inteligentes", "Humanos balanceados", "Humanos resistentes"]
-    poblacion_final = [r['poblacion_final'] for r in resultados_batch]
+# 3. Evaluar qué variables aportan más peso a la supervivencia
+correlaciones = datos_completos.corr()
+sns.heatmap(correlaciones[['supervivencia']], annot=True, cmap='coolwarm')
+plt.title('Correlaciones con Supervivencia')
+plt.show()
 
-    # Crear gráfico de barras para visualizar la hipótesis
-    plt.figure(figsize=(10, 6))
-    plt.bar(genotipos, poblacion_final)
-    plt.title('Efecto de Genotipos en la Supervivencia')
-    plt.xlabel('Genotipo (Fuerza, Inteligencia, Resistencia)')
-    plt.ylabel('Población Final Promedio')
-    plt.xticks(rotation=45, ha="right")
-    plt.tight_layout()
-    plt.show()
+# 4. Edad promedio de vida de los humanos
+print(f'Edad promedio de vida de los humanos: {datos_completos["edad_promedio"].mean()}')
 
+# 5. Impacto del clima y terreno en la supervivencia y toma de decisiones
+sns.scatterplot(data=datos_completos, x='clima', y='supervivencia', hue='terreno')
+plt.title('Clima vs Supervivencia')
+plt.xlabel('Clima')
+plt.ylabel('Supervivencia')
+plt.show()
 
-# Ejecutar simulacion sin dinosaurios
-resultados_batch = batch_simulate_genotipos(
-    n_simulaciones=50,
-)
-
-# Visualizar los resultados
-visualizar_resultados_batch(resultados_batch)
+sns.scatterplot(data=datos_completos, x='terreno', y='supervivencia', hue='clima')
+plt.title('Terreno vs Supervivencia')
+plt.xlabel('Terreno')
+plt.ylabel('Supervivencia')
+plt.show()
