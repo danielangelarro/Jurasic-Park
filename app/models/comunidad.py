@@ -11,47 +11,63 @@ class Comunidad:
         self.cansancio = np.zeros(n_humanos)
         self.salud = np.ones(n_humanos) * 100
         self.temperatura_corporal = np.zeros(n_humanos)
-        self.genotipo_fuerza = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_velocidad = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_resistencia = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_inteligencia = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_adaptabilidad = np.random.normal(loc=50, scale=10, size=n_humanos)
-        self.genotipo_supervivencia = np.random.normal(loc=50, scale=10, size=n_humanos)
+        self.genotipo_fuerza = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_velocidad = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_resistencia = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_inteligencia = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_adaptabilidad = np.random.normal(loc=50, scale=30, size=n_humanos)
+        self.genotipo_supervivencia = np.random.normal(loc=50, scale=30, size=n_humanos)
         self.edad = np.random.randint(18, 60, size=n_humanos)
         self.edad_inicial = self.edad.copy()
         self.genero = np.random.choice(['masculino', 'femenino'], size=n_humanos)
         self.ultima_reproduccion = np.full(n_humanos, -3)  # Iniciar todas como nunca se han reproducido
         self.posiciones = np.random.randint(0, tamano_entorno, (n_humanos, 2))  # Posicion aleatoria en el entorno
+        
+        self.edad_final = []
+        self.supervivencia_final = []
+        self.salud_final = []
+        self.supervivencia_max = 0
+        self.poblacion_total = n_humanos
 
         self.aplicar_interacciones_genotipicas()
-
+        
     def aplicar_interacciones_genotipicas(self):
         # Condiciones aplicadas a nivel de comunidad usando operaciones vectorizadas
 
         # Aumento de inteligencia disminuye la fuerza
-        self.genotipo_fuerza[self.genotipo_inteligencia > 0.7] *= 0.9
+        self.genotipo_fuerza[self.genotipo_inteligencia > 70] *= 0.9
 
         # Aumentar resistencia reduce la fuerza
-        self.genotipo_fuerza[self.genotipo_resistencia > 0.7] *= 0.85
+        self.genotipo_fuerza[self.genotipo_resistencia > 70] *= 0.85
 
         # Aumentar fuerza reduce la velocidad
-        self.genotipo_velocidad[self.genotipo_fuerza > 0.7] *= 0.85
+        self.genotipo_velocidad[self.genotipo_fuerza > 70] *= 0.85
 
         # Aumentar velocidad reduce la resistencia
-        self.genotipo_resistencia[self.genotipo_velocidad > 0.7] *= 0.9
+        self.genotipo_resistencia[self.genotipo_velocidad > 70] *= 0.9
 
         # Aumentar inteligencia mejora la eficiencia y aumenta resistencia
-        self.genotipo_resistencia[self.genotipo_inteligencia > 0.7] *= 1.1
+        self.genotipo_resistencia[self.genotipo_inteligencia > 70] *= 1.1
 
         # Alta fuerza y resistencia reduce la inteligencia
-        condicion_fuerza_resistencia = (self.genotipo_fuerza > 0.6) & (self.genotipo_resistencia > 0.6)
+        condicion_fuerza_resistencia = (self.genotipo_fuerza > 60) & (self.genotipo_resistencia > 60)
         self.genotipo_inteligencia[condicion_fuerza_resistencia] *= 0.85
 
-    def calcular_ataque(self, indice):
+    def calcular_ataque(self, indice, entorno):
         base_ataque = (self.genotipo_fuerza[indice] * 0.4 +
                        self.genotipo_velocidad[indice] * 0.3 +
                        self.genotipo_inteligencia[indice] * 0.2)
 
+          # Ajustar el ataque según la clase genética y el clima
+        base_ataque *= (1 + self.genotipo_adaptabilidad[indice] * 0.05)
+        
+        if self.genero[indice] == 'hombre':
+            base_ataque *= 1.1
+        
+        if entorno.clima == 'lluvioso':
+            base_ataque *= 0.9
+            
+            
         # Penalización por resistencia baja
         if self.genotipo_resistencia[indice] < 30:
             base_ataque *= 0.8  # Penalización del 20%
@@ -67,10 +83,19 @@ class Comunidad:
 
         return max(0, min(100, ataque))
 
-    def calcular_defensa(self, indice):
+    def calcular_defensa(self, indice, entorno):
         base_defensa = self.genotipo_resistencia[indice] * 0.4 + self.genotipo_adaptabilidad[indice] * 0.3 + \
                        self.genotipo_supervivencia[indice] * 0.2
 
+        # Ajustar la defensa según la clase genética y el clima
+        base_defensa *= (1 + self.genotipo_adaptabilidad[indice] * 0.02)
+        
+        if self.genero[indice] == 'mujer':
+            base_defensa *= 0.9
+        
+        if entorno.clima == 'tormenta':
+            base_defensa *= 1.1
+            
         factor_salud = self.salud[indice] / 100
         factor_hambre = max(0, 1 - self.hambre[indice] / 100)
         factor_sed = max(0, 1 - self.sed[indice] / 100)
@@ -85,18 +110,26 @@ class Comunidad:
     def actualizar_estados_fisiologicos(self):
         for i in range(self.n_humanos):
             tiempo = self.edad[i] - self.edad_inicial[i]
-            self.hambre[i] = min(max(0.1 * np.log(tiempo + 1) + self.hambre[i], 0), 100)
-            self.sed[i] = min(max(0.2 * np.log(tiempo + 1) + self.sed[i], 0), 100)
+            self.supervivencia_max = max(self.supervivencia_max, tiempo)
+            
+             # Ajustar el hambre, sed y cansancio según la clase genética y el clima
+            hambre_mod = 1 + self.genotipo_adaptabilidad[i] * 0.03
+            sed_mod = 1 + self.genotipo_adaptabilidad[i] * 0.04
+            cansancio_mod = 1 + self.genotipo_adaptabilidad[i] * 0.05
+            
+            self.hambre[i] = min(max(0.1 * np.log(tiempo + 1) + self.hambre[i] * hambre_mod, 0), 100)
+            self.sed[i] = min(max(0.2 * np.log(tiempo + 1) + self.sed[i] * sed_mod, 0), 100)
             self.cansancio[i] = min(
-                max(0.15 * np.log(tiempo + 1) * (1 - self.genotipo_resistencia[i] / 100) + self.cansancio[i], 0), 100)
+                max(0.15 * np.log(tiempo + 1) * (1 - self.genotipo_resistencia[i] / 100) + self.cansancio[i] * cansancio_mod, 0), 100)
+            self.salud = (300 - self.hambre + self.sed + self.cansancio) / 3
             self.edad[i] += 1
 
-            if self.genotipo_resistencia[i] > 0.7:
+            if self.genotipo_resistencia[i] > 70:
                 self.hambre[i] *= 0.8  # Mejora la resistencia al hambre
                 self.sed[i] *= 0.85  # Mejora la resistencia a la sed
                 self.cansancio[i] *= 0.75  # Mejora la resistencia al cansancio
 
-    def interaccion_dinosaurio(self, dinoasurios_por_posicion):
+    def interaccion_dinosaurio(self, dinoasurios_por_posicion, entorno):
         posiciones_tuplas = [tuple(coord) for coord in self.posiciones]
         conteo = Counter(posiciones_tuplas)
         diccionario_conteo = dict(conteo)
@@ -105,13 +138,20 @@ class Comunidad:
         for i, coord in enumerate(self.posiciones):
             coord = tuple(coord)
             cant_humanos = diccionario_conteo[coord]
-            ataque_humanos = self.calcular_ataque(i) * cant_humanos
-            defensa_humanos = self.calcular_defensa(i) * cant_humanos
+            ataque_humanos = self.calcular_ataque(i, entorno) * cant_humanos
+            defensa_humanos = self.calcular_defensa(i, entorno) * cant_humanos
 
             if dinoasurios_por_posicion[coord]["ataque"] > defensa_humanos:
                 muerte[i] = True
             elif ataque_humanos > dinoasurios_por_posicion[coord]["defensa"]:
                 pass
+            
+        # Ajustar la probabilidad de muerte según la clase genética y el clima
+        prob_muerte = np.exp(0.01 * (self.hambre + self.sed + self.cansancio - 200))
+        prob_muerte *= (1 + self.genotipo_adaptabilidad * 0.01)
+        
+        muerte = np.random.rand(self.n_humanos) < prob_muerte
+        
 
         return self.remove_humano(muerte)
 
@@ -121,7 +161,7 @@ class Comunidad:
 
         for i in range(self.n_humanos):
             tipo_terreno = entorno.terreno[self.posiciones[i][0], self.posiciones[i][1]]
-            terreno_mod = entorno.probabilidad_buscar_agua(tipo_terreno)
+            terreno_mod = entorno.probabilidad_buscar_agua(tipo_terreno, self.genotipo_adaptabilidad[i])
             adaptabilidad_prom = self.genotipo_adaptabilidad[i] / 100
             éxito[i] = np.random.rand() < self.probabilidad_éxito(0.5, terreno_mod + adaptabilidad_prom)
 
@@ -135,7 +175,7 @@ class Comunidad:
 
         for i in range(self.n_humanos):
             tipo_terreno = entorno.terreno[self.posiciones[i][0], self.posiciones[i][1]]
-            terreno_mod = entorno.probabilidad_buscar_comida(tipo_terreno)
+            terreno_mod = entorno.probabilidad_buscar_comida(tipo_terreno, self.genotipo_adaptabilidad[i])
             éxito[i] = np.random.rand() < self.probabilidad_éxito(0.5, terreno_mod)
 
         resultado = seleccion & éxito
@@ -145,8 +185,10 @@ class Comunidad:
     def desplazarse(self):
         for i in range(self.n_humanos):
             factor_velocidad = self.genotipo_velocidad[i] / 100
+            factor_cansancio = (100 - self.cansancio[i]) / 100 
+            factor_final = factor_velocidad * factor_cansancio 
 
-            movimiento = np.random.randint(-1, 2, size=2) * int(factor_velocidad * 3)  # Multiplicador de velocidad
+            movimiento = np.random.randint(-1, 2, size=2) * int(factor_final * 3)  # Multiplicador de velocidad
 
             nueva_posicion = self.posiciones[i] + movimiento
             nueva_posicion = np.clip(nueva_posicion, 0, self.tamano - 1)  # Limitar al tamano del entorno
@@ -180,7 +222,7 @@ class Comunidad:
         hijos = []
 
         for i in range(self.n_humanos):
-            if self.genero[i] == 'femenino' and self.edad[i] >= 18:
+            if self.genero[i] == 'femenino' and 15 <= self.edad[i] <= 50:
                 seleccion = np.random.rand() < self.probabilidad_seleccion_reproducirse(self.salud[i], self.edad[i],
                                                                                         self.ultima_reproduccion[i])
                 éxito = np.random.rand() < self.probabilidad_éxito(0.3, self.genotipo_supervivencia[i])
@@ -188,6 +230,7 @@ class Comunidad:
                     hijos += self.crear_hijos()
 
         self.n_humanos += len(hijos)
+        self.poblacion_total += len(hijos)
         self.ultima_reproduccion[self.ultima_reproduccion >= 0] += 1
 
         if hijos:
@@ -219,12 +262,19 @@ class Comunidad:
         genotipo_adaptabilidad = self.genotipo_adaptabilidad[padre] if np.random.rand() > 0.5 else self.genotipo_adaptabilidad[madre]
         genotipo_supervivencia = self.genotipo_supervivencia[padre] if np.random.rand() > 0.5 else self.genotipo_supervivencia[madre]
 
-        genotipo_fuerza += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_velocidad += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_resistencia += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_inteligencia += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_adaptabilidad += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
-        genotipo_supervivencia += np.random.randint(-1, 1) if np.random.rand() < 0.2 else 0
+        genotipo_fuerza += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_velocidad += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_resistencia += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_inteligencia += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_adaptabilidad += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        genotipo_supervivencia += np.random.normal(loc=0, scale=1) if np.random.rand() < 0.2 else 0
+        
+        genotipo_fuerza = max(5, min(100, genotipo_fuerza))
+        genotipo_velocidad = max(5, min(100, genotipo_velocidad))
+        genotipo_resistencia = max(5, min(100, genotipo_resistencia))
+        genotipo_inteligencia = max(5, min(100, genotipo_inteligencia))
+        genotipo_adaptabilidad = max(5, min(100, genotipo_adaptabilidad))
+        genotipo_supervivencia = max(5, min(100, genotipo_supervivencia))
 
         edad = 0
         salud = 100
@@ -256,6 +306,16 @@ class Comunidad:
     def mortalidad(self):
         prob_muerte = np.exp(0.01 * (self.hambre + self.sed + self.cansancio - 200))
         muerte = np.random.rand(self.n_humanos) < prob_muerte
+        edad_muerte = self.edad >= np.random.normal(loc=75, scale=15, size=self.n_humanos)
+        
+        muerte |= edad_muerte
+        
+        for i, m_i in enumerate(muerte):
+            if m_i:
+                tiempo = self.edad[i] - self.edad_inicial[i]
+                self.supervivencia_final.append(tiempo)
+                self.edad_final.append(self.edad[i])
+                self.salud_final.append(self.salud[i])
 
         return self.remove_humano(muerte)
 

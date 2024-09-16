@@ -29,7 +29,7 @@ class Entorno:
         estado_actual = CLIMA_ESTADOS.index(self.clima)
         self.clima = np.random.choice(CLIMA_ESTADOS, p=MATRIZ_CLIMA[estado_actual])
 
-    def probabilidad_buscar_agua(self, tipo_terreno):
+    def probabilidad_buscar_agua(self, tipo_terreno, adaptabilidad):
         # Diccionario de probabilidades basado en el tipo de terreno
         probabilidad_terreno = {
             'sabana': 0.7,
@@ -46,13 +46,13 @@ class Entorno:
             'tormenta': 0.5,
             'lluvioso': 0.1,
         }
+        
+        # Ajustar la probabilidad según la clase genética
+        probabilidad_final = probabilidad_terreno[tipo_terreno] * probabilidad_clima[self.clima] * (1 + adaptabilidad * 0.01)
 
-        # Combinar probabilidades
-        probabilidad = probabilidad_terreno[tipo_terreno] * probabilidad_clima[self.clima]
+        return probabilidad_final
 
-        return probabilidad
-
-    def probabilidad_buscar_comida(self, tipo_terreno):
+    def probabilidad_buscar_comida(self, tipo_terreno, adaptabilidad):
         # Diccionario de probabilidades basadas en el tipo de terreno
         probabilidad_terreno = {
             'sabana': 0.5,
@@ -71,7 +71,7 @@ class Entorno:
         }
 
         # Calcular la probabilidad final como el producto de las probabilidades individuales
-        probabilidad_final = probabilidad_terreno[tipo_terreno] * probabilidad_clima[self.clima]
+        probabilidad_final = probabilidad_terreno[tipo_terreno] * probabilidad_clima[self.clima] * (1 + adaptabilidad * 0.01)
 
         return probabilidad_final
 
@@ -87,8 +87,8 @@ class Entorno:
             dinos.sort(key=lambda d: d.probabilidad_aparicion(self.clima, terreno), reverse=True)
 
             for dino in dinos:
-                cantidad = np.random.randint(2) if dino.convivencia == ConvivenciaType.SOLITARIO else np.random.randint(
-                    4)
+                cantidad = np.random.randint(2) if dino.convivencia == ConvivenciaType.SOLITARIO else np.random.randint(4)
                 dinosaurios_en_terreno[posicion]['ataque'] += cantidad * dino.ataque
+                dinosaurios_en_terreno[posicion]['defensa'] += cantidad * dino.defensa
 
         return dinosaurios_en_terreno
