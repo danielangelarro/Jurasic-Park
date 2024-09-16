@@ -59,7 +59,7 @@ class Simulacion:
         for ciclo in range(self.n_ciclos):
             if self.clima is None:
                 self.entorno.cambiar_clima()
-            
+
             self.comunidad.actualizar_estados_fisiologicos()
             self.comunidad.mortalidad()
 
@@ -72,7 +72,7 @@ class Simulacion:
             self.comunidad.desplazarse()
 
             dinosaurios_posicion = self.entorno.generate_dinosaurios(posiciones=self.comunidad.posiciones)
-            dinosaurios_resultado = self.comunidad.interaccion_dinosaurio(dinoasurios_por_posicion=dinosaurios_posicion)
+            dinosaurios_resultado = self.comunidad.interaccion_dinosaurio(dinoasurios_por_posicion=dinosaurios_posicion, entorno=self.entorno)
 
             self.sistema_experto.reset()
             self.sistema_experto.declare(EstadoComunidad(sed=np.mean(self.comunidad.sed)))

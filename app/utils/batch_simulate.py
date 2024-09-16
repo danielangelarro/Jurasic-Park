@@ -22,11 +22,11 @@ def batch_simulate(
         if genotipo_input == {}:
             genotipo = {
                 'fuerza': np.random.randint(5, 100),
-                'velocidad': np.random.randint(5, 10),
-                'resistencia': np.random.randint(5, 10),
-                'inteligencia': np.random.randint(5, 10),
-                'adaptabilidad': np.random.randint(5, 10),
-                'supervivencia': np.random.randint(5, 10),
+                'velocidad': np.random.randint(5, 100),
+                'resistencia': np.random.randint(5, 100),
+                'inteligencia': np.random.randint(5, 100),
+                'adaptabilidad': np.random.randint(5, 100),
+                'supervivencia': np.random.randint(5, 100),
             }
         else:
             genotipo = genotipo_input.copy()

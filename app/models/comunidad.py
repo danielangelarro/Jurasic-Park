@@ -30,7 +30,7 @@ class Comunidad:
         self.poblacion_total = n_humanos
 
         self.aplicar_interacciones_genotipicas()
-
+        
     def aplicar_interacciones_genotipicas(self):
         # Condiciones aplicadas a nivel de comunidad usando operaciones vectorizadas
 
@@ -53,11 +53,21 @@ class Comunidad:
         condicion_fuerza_resistencia = (self.genotipo_fuerza > 60) & (self.genotipo_resistencia > 60)
         self.genotipo_inteligencia[condicion_fuerza_resistencia] *= 0.85
 
-    def calcular_ataque(self, indice):
+    def calcular_ataque(self, indice, entorno):
         base_ataque = (self.genotipo_fuerza[indice] * 0.4 +
                        self.genotipo_velocidad[indice] * 0.3 +
                        self.genotipo_inteligencia[indice] * 0.2)
 
+          # Ajustar el ataque según la clase genética y el clima
+        base_ataque *= (1 + self.genotipo_adaptabilidad[indice] * 0.05)
+        
+        if self.genero[indice] == 'hombre':
+            base_ataque *= 1.1
+        
+        if entorno.clima == 'lluvioso':
+            base_ataque *= 0.9
+            
+            
         # Penalización por resistencia baja
         if self.genotipo_resistencia[indice] < 30:
             base_ataque *= 0.8  # Penalización del 20%
@@ -73,10 +83,19 @@ class Comunidad:
 
         return max(0, min(100, ataque))
 
-    def calcular_defensa(self, indice):
+    def calcular_defensa(self, indice, entorno):
         base_defensa = self.genotipo_resistencia[indice] * 0.4 + self.genotipo_adaptabilidad[indice] * 0.3 + \
                        self.genotipo_supervivencia[indice] * 0.2
 
+        # Ajustar la defensa según la clase genética y el clima
+        base_defensa *= (1 + self.genotipo_adaptabilidad[indice] * 0.02)
+        
+        if self.genero[indice] == 'mujer':
+            base_defensa *= 0.9
+        
+        if entorno.clima == 'tormenta':
+            base_defensa *= 1.1
+            
         factor_salud = self.salud[indice] / 100
         factor_hambre = max(0, 1 - self.hambre[indice] / 100)
         factor_sed = max(0, 1 - self.sed[indice] / 100)
@@ -92,10 +111,16 @@ class Comunidad:
         for i in range(self.n_humanos):
             tiempo = self.edad[i] - self.edad_inicial[i]
             self.supervivencia_max = max(self.supervivencia_max, tiempo)
-            self.hambre[i] = min(max(0.1 * np.log(tiempo + 1) + self.hambre[i], 0), 100)
-            self.sed[i] = min(max(0.2 * np.log(tiempo + 1) + self.sed[i], 0), 100)
+            
+             # Ajustar el hambre, sed y cansancio según la clase genética y el clima
+            hambre_mod = 1 + self.genotipo_adaptabilidad[i] * 0.03
+            sed_mod = 1 + self.genotipo_adaptabilidad[i] * 0.04
+            cansancio_mod = 1 + self.genotipo_adaptabilidad[i] * 0.05
+            
+            self.hambre[i] = min(max(0.1 * np.log(tiempo + 1) + self.hambre[i] * hambre_mod, 0), 100)
+            self.sed[i] = min(max(0.2 * np.log(tiempo + 1) + self.sed[i] * sed_mod, 0), 100)
             self.cansancio[i] = min(
-                max(0.15 * np.log(tiempo + 1) * (1 - self.genotipo_resistencia[i] / 100) + self.cansancio[i], 0), 100)
+                max(0.15 * np.log(tiempo + 1) * (1 - self.genotipo_resistencia[i] / 100) + self.cansancio[i] * cansancio_mod, 0), 100)
             self.salud = (300 - self.hambre + self.sed + self.cansancio) / 3
             self.edad[i] += 1
 
@@ -104,7 +129,7 @@ class Comunidad:
                 self.sed[i] *= 0.85  # Mejora la resistencia a la sed
                 self.cansancio[i] *= 0.75  # Mejora la resistencia al cansancio
 
-    def interaccion_dinosaurio(self, dinoasurios_por_posicion):
+    def interaccion_dinosaurio(self, dinoasurios_por_posicion, entorno):
         posiciones_tuplas = [tuple(coord) for coord in self.posiciones]
         conteo = Counter(posiciones_tuplas)
         diccionario_conteo = dict(conteo)
@@ -113,13 +138,20 @@ class Comunidad:
         for i, coord in enumerate(self.posiciones):
             coord = tuple(coord)
             cant_humanos = diccionario_conteo[coord]
-            ataque_humanos = self.calcular_ataque(i) * cant_humanos
-            defensa_humanos = self.calcular_defensa(i) * cant_humanos
+            ataque_humanos = self.calcular_ataque(i, entorno) * cant_humanos
+            defensa_humanos = self.calcular_defensa(i, entorno) * cant_humanos
 
             if dinoasurios_por_posicion[coord]["ataque"] > defensa_humanos:
                 muerte[i] = True
             elif ataque_humanos > dinoasurios_por_posicion[coord]["defensa"]:
                 pass
+            
+        # Ajustar la probabilidad de muerte según la clase genética y el clima
+        prob_muerte = np.exp(0.01 * (self.hambre + self.sed + self.cansancio - 200))
+        prob_muerte *= (1 + self.genotipo_adaptabilidad * 0.01)
+        
+        muerte = np.random.rand(self.n_humanos) < prob_muerte
+        
 
         return self.remove_humano(muerte)
 
@@ -129,7 +161,7 @@ class Comunidad:
 
         for i in range(self.n_humanos):
             tipo_terreno = entorno.terreno[self.posiciones[i][0], self.posiciones[i][1]]
-            terreno_mod = entorno.probabilidad_buscar_agua(tipo_terreno)
+            terreno_mod = entorno.probabilidad_buscar_agua(tipo_terreno, self.genotipo_adaptabilidad[i])
             adaptabilidad_prom = self.genotipo_adaptabilidad[i] / 100
             éxito[i] = np.random.rand() < self.probabilidad_éxito(0.5, terreno_mod + adaptabilidad_prom)
 
@@ -143,7 +175,7 @@ class Comunidad:
 
         for i in range(self.n_humanos):
             tipo_terreno = entorno.terreno[self.posiciones[i][0], self.posiciones[i][1]]
-            terreno_mod = entorno.probabilidad_buscar_comida(tipo_terreno)
+            terreno_mod = entorno.probabilidad_buscar_comida(tipo_terreno, self.genotipo_adaptabilidad[i])
             éxito[i] = np.random.rand() < self.probabilidad_éxito(0.5, terreno_mod)
 
         resultado = seleccion & éxito

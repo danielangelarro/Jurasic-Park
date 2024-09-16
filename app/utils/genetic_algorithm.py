@@ -6,7 +6,7 @@ from app.utils.simulacion import Simulacion
 class CombinacionGenetica:
     def __init__(
             self,
-            genotipo=None,
+            genotipo={},
             tamano_entorno = 10,
             n_humanos = 10,
             n_ciclos = 100,
@@ -15,6 +15,16 @@ class CombinacionGenetica:
             entorno = None,
     ):
 
+        if genotipo == {}:
+            genotipo = {
+                'fuerza': np.random.randint(5, 100),
+                'velocidad': np.random.randint(5, 100),
+                'resistencia': np.random.randint(5, 100),
+                'inteligencia': np.random.randint(5, 100),
+                'adaptabilidad': np.random.randint(5, 100),
+                'supervivencia': np.random.randint(5, 100),
+            }
+
         self.simulacion = Simulacion(
             tamano_entorno=tamano_entorno,
             n_humanos=n_humanos,
@@ -22,12 +32,13 @@ class CombinacionGenetica:
             genotipo=genotipo,
             reproduccion=reproduccion,
             dinosaurios=dinosaurios,
-            entorno=entorno
-        )
-        self.genotipo = genotipo
+            entorno=entorno,
+            save_results=True
+        )        
+        self.genotipo = genotipo.copy()
         self.resultado = self.simulacion.ejecutar()
-        self.aptitud = self.resultado["poblacion"][-1]
-        self.max_poblacion = max(self.resultado["poblacion"])
+        self.aptitud = self.resultado["duracion_supervivencia"]
+        self.max_poblacion = self.resultado["poblacion_total"]
 
     def __str__(self):
         return f"({self.genotipo})"
@@ -38,7 +49,8 @@ class GeneticAlgorithm:
                  tamano_entorno=10,
                  n_humanos=10,
                  n_ciclos=100,
-                 n_generaciones=50,
+                 n_generaciones=500,
+                 n_poblacion=50,
                  reproduccion=True,
                  dinosaurios=[],
                  entorno=None,
@@ -48,12 +60,13 @@ class GeneticAlgorithm:
         self.n_humanos = n_humanos
         self.n_ciclos = n_ciclos
         self.n_generaciones = n_generaciones
+        self.n_poblacion = n_poblacion
         self.reproduccion = reproduccion
         self.dinosaurios = dinosaurios
 
         self.poblacion = self.crear_poblacion()
 
-    def crear_combinacion_genetica(self, genotipo=None):
+    def crear_combinacion_genetica(self, genotipo={}):
         return CombinacionGenetica(
             genotipo=genotipo,
             tamano_entorno=self.tamano_entorno,
@@ -65,7 +78,7 @@ class GeneticAlgorithm:
         )
 
     def crear_poblacion(self):
-        return [self.crear_combinacion_genetica() for _ in range(10)]
+        return [self.crear_combinacion_genetica() for _ in range(self.n_poblacion)]
 
     def seleccion(self):
         self.poblacion.sort(key=lambda x: (x.aptitud, x.max_poblacion), reverse=True)
@@ -102,14 +115,18 @@ class GeneticAlgorithm:
     def mutacion(self, genotipo: dict, tasa_mutacion=0.1):
         for key in genotipo.keys():
             if np.random.rand() < tasa_mutacion:
-                genotipo[key] += np.random.randint(-5, 5)
+                genotipo[key] += np.random.normal(loc=0, scale=1)
                 genotipo[key] = max(10, min(100, genotipo[key]))
 
         return genotipo
 
     def evolucionar(self):
+        historial_poblacion = []
+        
         for _ in range(self.n_generaciones):
             self.seleccion()
+
+            historial_poblacion.append(self.poblacion[0].aptitud)
 
             nueva_poblacion = []
             for i in range(0, len(self.poblacion), 2):
@@ -123,3 +140,5 @@ class GeneticAlgorithm:
                 ])
 
             self.poblacion = nueva_poblacion.copy()
+        
+        return historial_poblacion

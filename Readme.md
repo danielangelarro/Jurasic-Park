@@ -64,31 +64,21 @@ En dependencia de la cantidad de dinosaurios y humanos generados en una casilla 
 
 - Python 3.8+
 - NumPy para cálculos numéricos eficientes.
+- Pandas para el trabajo con tablas.
 - Matplotlib para visualización de datos y animaciones.
 
 ### Estructura del Código
 
 1. `jurasic-simulation.ipynb`: Punto de entrada de la simulación.
-2. `app/data/mapa.json`: Guarda la información por defecto de un mapa generado.
-3. `app/models/entorno.py`: Definición y gestión del mapa y recursos.
-4. `app/models/comunidad.py`: Clase y lógica para los agentes humanos.
-5. `app/models/dinosaurio.py`: Clase y comportamientos de los dinosaurios.
-6. `app/utils/simulacion.py`: Motor principal de la simulación.
-7. `app/utils/batch_simulate.py`: Permite ejecutar varios ciclos de simulaciones.
-8. `app/utils/draw_map.py`: Permite dibujar el mapa.
-9. `app/utils/genetic_algorithm.py`: Clase y configuraciones para la ejecución del algoritmo genético.
-
-## Análisis y Resultados
-
-- Gráficos de población a lo largo del tiempo.
-- Estadísticas de evolución genética.
-- Patrones de comportamiento emergentes.
-
-## Conclusiones y Trabajo Futuro
-
-- Resumen de hallazgos principales.
-- Discusión sobre la validez del modelo y sus limitaciones.
-- Propuestas para mejoras y expansiones del proyecto.
+2. `app/data/mapa_seed_43.json`: Guarda la información por defecto de un mapa generado.
+3. `app/data/resultados_simulacion.csv.json`: Guarda la información de las simulaciones realizadas.
+4. `app/models/entorno.py`: Definición y gestión del mapa y recursos.
+5. `app/models/comunidad.py`: Clase y lógica para los agentes humanos.
+6. `app/models/dinosaurio.py`: Clase y comportamientos de los dinosaurios.
+7. `app/utils/simulacion.py`: Motor principal de la simulación.
+8. `app/utils/batch_simulate.py`: Permite ejecutar varios ciclos de simulaciones.
+9. `app/utils/draw_map.py`: Permite dibujar el mapa.
+10. `app/utils/genetic_algorithm.py`: Clase y configuraciones para la ejecución del algoritmo genético.
 
 ## Modelo Matemático
 
